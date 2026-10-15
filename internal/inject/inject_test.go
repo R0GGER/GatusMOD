@@ -97,6 +97,23 @@ func TestHTML_DateTime(t *testing.T) {
 	}
 }
 
+func TestHTML_Logo(t *testing.T) {
+	page := `<html><head><script>window.config = {logo: "", link: ""};</script></head><body></body></html>`
+	cfg := &config.Config{BaseURL: "https://status.example.com", UI: config.UI{Logo: "[baseurl]/favicon/logo.png", LogoLink: "https://www.example.com"}}
+	out, report := HTML([]byte(page), cfg)
+	s := string(out)
+	want := `<script>window.config=Object.assign(window.config||{},{"link":"https://www.example.com","logo":"https://status.example.com/favicon/logo.png"});</script>`
+	if !strings.Contains(s, want) || strings.Index(s, want) < strings.Index(s, "window.config = ") || len(report.Missing) != 0 {
+		t.Errorf("expected the logo override after the Gatus config:\n%s", s)
+	}
+	if out, _ := HTML([]byte(page), &config.Config{}); strings.Contains(string(out), "Object.assign") {
+		t.Error("without a logo the Gatus config must be kept")
+	}
+	if _, report := HTML([]byte(gatusIndex), cfg); len(report.Missing) != 1 || report.Missing[0] != "logo" {
+		t.Errorf("a page without window.config should report the logo as missing, got %v", report.Missing)
+	}
+}
+
 func TestAppJS(t *testing.T) {
 	js := []byte(`Oa={key:3,class:"mt-12 pb-8"},Pa=96,Ka=50;var Va={__name:"Home",props:{}}`)
 	out, report := AppJS(js, &config.UI{ItemsPerPage: 24})

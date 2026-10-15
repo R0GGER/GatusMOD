@@ -96,6 +96,22 @@ func HTML(body []byte, cfg *config.Config) ([]byte, Report) {
 		}
 		report.ok(tag.name)
 	}
+	logo := map[string]string{}
+	if cfg.UI.Logo != "" {
+		logo["logo"] = cfg.ResolveURL(cfg.UI.Logo)
+	}
+	if cfg.UI.LogoLink != "" {
+		logo["link"] = cfg.ResolveURL(cfg.UI.LogoLink)
+	}
+	if len(logo) > 0 {
+		if strings.Contains(s, "window.config") {
+			data, _ := json.Marshal(logo)
+			head.WriteString(`<script>window.config=Object.assign(window.config||{},` + string(data) + `);</script>` + "\n")
+			report.ok("logo")
+		} else {
+			report.miss("logo")
+		}
+	}
 	settings, _ := json.Marshal(map[string]any{
 		"headingShow":  cfg.UI.HeadingVisible(),
 		"subtitleShow": cfg.UI.SubtitleVisible(),

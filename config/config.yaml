@@ -8,9 +8,6 @@ storage:
 
 ui:
   title: Status | Example
-  # Logo at the top left: a full URL, or a path to a file in config/favicon (served at /favicon/).
-  logo: /favicon/gatusmod_128.png
-  link: /
   dashboard-heading: Status
   dashboard-subheading: Live status of our services
 
@@ -34,13 +31,17 @@ gatusmod:
     items-per-page: 6
     dashboard-heading-show: true
     subtitle-show: true
+    # Logo at the top left: a full URL, or a file in config/favicon (served at /favicon/). Also editable in Settings.
+    logo: /favicon/gatusmod_128.png
+    logo-link: /
+    # Paths starting with / work on every address of the site; [baseurl] only works when base-url is that address.
     favicon:
-      default: "[baseurl]/favicon/favicon.ico"
-      size16x16: "[baseurl]/favicon/gatusmod_16.png"
-      size32x32: "[baseurl]/favicon/gatusmod_32.png"
-      apple-touch: "[baseurl]/favicon/gatusmod_256.png"
-      size192x192: "[baseurl]/favicon/gatusmod_192.png"
-      size512x512: "[baseurl]/favicon/gatusmod_512.png"
+      default: /favicon/favicon.ico
+      size16x16: /favicon/gatusmod_16.png
+      size32x32: /favicon/gatusmod_32.png
+      apple-touch: /favicon/gatusmod_256.png
+      size192x192: /favicon/gatusmod_192.png
+      size512x512: /favicon/gatusmod_512.png
     footer: '<p>Powered by <b><a href="https://github.com/r0gger/gatusmod" target="_blank">GatusMOD</a></b>, a modification of <b><a href="https://github.com/TwiN/gatus" target="_blank">Gatus</a></b> | <a href="/mod/admin/login">Admin</a></p>' 
   admin:
     username: admin

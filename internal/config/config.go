@@ -75,11 +75,14 @@ type Defaults struct {
 }
 
 type UI struct {
-	ItemsPerPage         int     `yaml:"items-per-page,omitempty"`
-	DashboardHeadingShow *bool   `yaml:"dashboard-heading-show,omitempty"`
-	SubtitleShow         *bool   `yaml:"subtitle-show,omitempty"`
-	Footer               string  `yaml:"footer,omitempty"`
-	Favicon              Favicon `yaml:"favicon,omitempty"`
+	ItemsPerPage         int    `yaml:"items-per-page,omitempty"`
+	DashboardHeadingShow *bool  `yaml:"dashboard-heading-show,omitempty"`
+	SubtitleShow         *bool  `yaml:"subtitle-show,omitempty"`
+	Footer               string `yaml:"footer,omitempty"`
+	// Logo and LogoLink replace the logo at the top left of the dashboard and where it links to.
+	Logo     string  `yaml:"logo,omitempty"`
+	LogoLink string  `yaml:"logo-link,omitempty"`
+	Favicon  Favicon `yaml:"favicon,omitempty"`
 	// TimeFormat and DateFormat change the timestamps of the dashboard; empty keeps the format of the browser.
 	TimeFormat string `yaml:"time-format,omitempty"`
 	DateFormat string `yaml:"date-format,omitempty"`

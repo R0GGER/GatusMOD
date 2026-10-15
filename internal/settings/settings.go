@@ -46,6 +46,8 @@ type General struct {
 	Footer               *string         `json:"footer,omitempty"`
 	TimeFormat           *string         `json:"timeFormat,omitempty"`
 	DateFormat           *string         `json:"dateFormat,omitempty"`
+	Logo                 *string         `json:"logo,omitempty"`
+	LogoLink             *string         `json:"logoLink,omitempty"`
 	Favicon              *config.Favicon `json:"favicon,omitempty"`
 	Analytics            *Analytics      `json:"analytics,omitempty"`
 }
@@ -187,6 +189,12 @@ func Merge(base *config.Config, s Settings) (*config.Config, error) {
 	}
 	if g.DateFormat != nil {
 		cfg.UI.DateFormat = *g.DateFormat
+	}
+	if g.Logo != nil {
+		cfg.UI.Logo = *g.Logo
+	}
+	if g.LogoLink != nil {
+		cfg.UI.LogoLink = *g.LogoLink
 	}
 	if g.Favicon != nil {
 		cfg.UI.Favicon = *g.Favicon

@@ -380,6 +380,12 @@ func mergeGeneral(cur, b General) General {
 	if b.DateFormat != nil {
 		cur.DateFormat = b.DateFormat
 	}
+	if b.Logo != nil {
+		cur.Logo = b.Logo
+	}
+	if b.LogoLink != nil {
+		cur.LogoLink = b.LogoLink
+	}
 	if b.Favicon != nil {
 		cur.Favicon = b.Favicon
 	}

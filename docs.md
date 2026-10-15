@@ -286,7 +286,8 @@ docker compose run --rm gatusmod probe "iperf3://iperf.example.org:5201?bandwidt
   - *External Database*: add, edit, and delete databases and their tables/views, and read a table/view now (*Run*). Each table/view shows its file, schedule, the next run,
   and the last run (*183 endpoints from 183 rows in 227ms*).
 - **Settings**: base URL, default interval, items per page, heading and subtitle, clock (12-hour or 24-hour) and date notation
-(DD/MM/YYYY or MM/DD/YYYY), footer, favicons, analytics, and the admin password. The clock and date notation can also be set
+(DD/MM/YYYY or MM/DD/YYYY), footer, logo and logo link, favicons, analytics, and the admin password. The logo can also be
+set in YAML as `ui.logo` and `ui.logo-link` (a URL or a path such as `/favicon/logo.png`); left empty, the `ui.logo` and `ui.link` of Gatus are used. The clock and date notation can also be set
 in YAML as `ui.time-format: 24h` and `ui.date-format: DD/MM/YYYY`; left empty, the browser decides.
 - **Status pages**: add, edit, and delete the [status pages](#status-pages).
 - **Badges**: the *Embed badge* generator (period, style, content, overall/group/import, Markdown/HTML/URL) and, per endpoint,
