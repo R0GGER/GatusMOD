@@ -23,7 +23,7 @@ GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a 
   ```bash
    services:
     gatus:
-      image: twinproduction/gatus:v5.37.0
+      image: ghcr.io/twin/gatus:latest
       restart: unless-stopped
       environment:
         GATUS_CONFIG_PATH: /config
