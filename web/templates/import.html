@@ -1,0 +1,73 @@
+{{define "content"}}
+<section>
+  <h2>Backup</h2>
+  <p>Download the GatusMOD configuration as one YAML file: the external databases, their tables and views with the
+    column mapping and schedule, the local tables with their rows, and the settings. The rows stored in NocoDB or
+    Baserow, the monitoring history of Gatus and the admin password are not part of it.</p>
+  <p class="muted">Now: {{.Counts.Databases}} external databases, {{.Counts.Views}} tables/views, {{.Counts.Tables}} local tables.</p>
+  <form method="post" action="/mod/admin/import/export">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <label class="check"><input type="checkbox" name="tokens" /> Include the API tokens of the external databases and the passwords of the private status pages</label>
+    <p class="muted small">With tokens, the file gives access to your databases: store it safely. Without tokens, a
+      restore on this installation keeps the current tokens and status page passwords; elsewhere you fill them in on
+      Databases &gt; External Database and Status pages.</p>
+    <button type="submit">Download backup</button>
+  </form>
+</section>
+
+<section>
+  <h2>Restore</h2>
+  {{if .RestoreError}}<p class="notice error">{{.RestoreError}}</p>{{end}}
+  {{with .Restored}}
+  <p class="notice success">Backup restored{{if $.Replace}} (replaced){{else}} (merged){{end}}.
+    Databases: {{.DatabasesAdded}} added, {{.DatabasesUpdated}} updated.
+    Tables/views: {{.ViewsAdded}} added, {{.ViewsUpdated}} updated.
+    Local tables: {{.TablesAdded}} added, {{.TablesUpdated}} updated.
+    {{if .Removed}}Removed: {{len .Removed}}{{if $.RemovedFiles}} (deleted files: {{$.RemovedFiles}}){{end}}.{{end}}
+    The endpoints are synced now.</p>
+  {{if .MissingTokens}}<p class="notice error">No API token for: {{join .MissingTokens ", "}}.
+    Fill it in on <a href="/mod/admin/databases">Databases &gt; External Database</a>.</p>{{end}}
+  {{if .LockedStatusPages}}<p class="notice error">The private status pages {{join .LockedStatusPages ", "}} have no password in the backup:
+    nobody can open them until you set a new password under <a href="/mod/admin/settings#status-pages">Settings &gt; Status pages</a>.</p>{{end}}
+  {{end}}
+  <form method="post" action="/mod/admin/import/restore" enctype="multipart/form-data"
+    data-confirm="Restore this backup? With Replace, databases, tables and views that are not in the backup are deleted.">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <label>Backup file <input type="file" name="file" accept=".yaml,.yml" required /></label>
+    <label class="check"><input type="radio" name="mode" value="merge" checked />
+      Merge: databases, tables and views with the same name are updated, the others are added, nothing is deleted</label>
+    <label class="check"><input type="radio" name="mode" value="replace" />
+      Replace: the configuration becomes exactly the backup, including its probe secret (push URLs)</label>
+    <p class="muted small">The admin password is never changed. Merge keeps the current probe secret, so existing push URLs keep working.</p>
+    <button type="submit">Restore</button>
+  </form>
+</section>
+
+<section>
+  <h2>Import Gatus endpoints from YAML</h2>
+  {{if .Targets}}
+  <p>Paste or upload an existing Gatus configuration. Every entry of <code>endpoints:</code> is added to the table of the
+    chosen table or view; existing rows with the same group and name are updated. Settings without their own column
+    (alerts, headers, body, dns, client, ...) are stored as YAML in the extra column, if one is mapped.</p>
+  {{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}
+  {{with .Result}}
+  <p class="notice">Created: {{.Created}}, updated: {{.Updated}}, unchanged: {{.Unchanged}}.</p>
+  {{if .Problems}}<ul class="problems">{{range .Problems}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  {{end}}
+  <form method="post" action="/mod/admin/import" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <label>Write to table/view
+      <select name="target">{{range .Targets}}<option value="{{.ID}}" {{if eq .ID $.Target}}selected{{end}}>{{.Label}} ({{.Provider}}, table {{.TableID}})</option>{{end}}</select>
+    </label>
+    <label>YAML file <input type="file" name="file" accept=".yaml,.yml" /></label>
+    <label>or paste YAML
+      <textarea name="yaml" rows="18" spellcheck="false" placeholder="endpoints:&#10;  - name: website&#10;    url: https://example.org&#10;    conditions:&#10;      - &quot;[STATUS] == 200&quot;">{{.YAML}}</textarea>
+    </label>
+    <button type="submit">Import</button>
+  </form>
+  {{else}}
+  <p class="muted">No table or view can receive YAML endpoints yet: it needs columns mapped for at least name and url.
+    <a href="/mod/admin/databases">Manage databases</a>.</p>
+  {{end}}
+</section>
+{{end}}

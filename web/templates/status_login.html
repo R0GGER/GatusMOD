@@ -1,0 +1,25 @@
+{{define "status_login"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>{{.Title}}</title>
+  <link rel="stylesheet" href="/mod/static/admin.css" />
+</head>
+<body class="login-page">
+  <main>
+    <section class="login-box">
+      <h2>{{.Title}}</h2>
+      <p class="muted">This status page is private. Enter the password to view it.</p>
+      {{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}
+      <form method="post" action="/mod/status-login">
+        {{if .Page}}<input type="hidden" name="page" value="{{.Page}}" />{{end}}
+        <input type="hidden" name="next" value="{{.Next}}" />
+        <label>Password <input type="password" name="password" autocomplete="current-password" required autofocus /></label>
+        <button type="submit">Open status page</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>{{end}}

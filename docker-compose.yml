@@ -1,0 +1,25 @@
+services:
+  gatus:
+    image: twinproduction/gatus:v5.37.0
+    restart: unless-stopped
+    environment:
+      GATUS_CONFIG_PATH: /config
+    volumes:
+      - ./config:/config
+      - ./config/db:/data
+    # No published port: Gatus is only reachable through GatusMOD.
+  gatusmod:
+    #build: .
+    image: ghcr.io/r0gger/gatusmod:latest
+    restart: unless-stopped
+    depends_on:
+      - gatus
+    ports:
+      - "8080:8080"
+    environment:
+      GATUSMOD_CONFIG_PATH: /config
+      GATUSMOD_DATA_PATH: /config      
+    volumes:
+      - ./config:/config
+      - ./config/favicon:/favicon:ro
+      - ./config/public:/public:ro

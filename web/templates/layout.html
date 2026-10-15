@@ -1,0 +1,45 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>GatusMOD admin</title>
+  <link rel="stylesheet" href="/mod/static/admin.css" />
+</head>
+<body>
+  <header>
+    <strong>GatusMOD</strong>
+    <nav>
+      <a href="/mod/admin/" {{if or (eq .Page "overview.html") (eq .Page "checks.html")}}class="active"{{end}}>Overview</a>
+      <a href="/mod/admin/settings" {{if eq .Page "settings.html"}}class="active"{{end}}>Settings</a>
+      <a href="/mod/admin/endpoints" {{if or (eq .Page "tables.html") (eq .Page "table_edit.html") (eq .Page "databases.html") (eq .Page "database_edit.html") (eq .Page "view_edit.html")}}class="active"{{end}}>Databases</a>
+      <a href="/mod/admin/status-pages" {{if eq .Page "statuspages.html"}}class="active"{{end}}>Status pages</a>
+      <a href="/mod/admin/badges" {{if eq .Page "badges.html"}}class="active"{{end}}>Badges</a>
+      <a href="/mod/admin/import" {{if eq .Page "import.html"}}class="active"{{end}}>Backup &amp; import</a>
+    </nav>
+    <form method="post" action="/mod/admin/logout" class="logout">
+      <input type="hidden" name="csrf" value="{{.CSRF}}" />
+      <a href="/" class="button secondary">&larr; View site</a>
+      <button type="submit" class="secondary user-logout" title="Log out {{.User}}"><span class="user">{{.User}}</span>Log out</button>
+    </form>
+  </header>
+  <main>
+    {{if or (eq .Page "overview.html") (eq .Page "checks.html")}}
+    <nav class="tabs">
+      <a href="/mod/admin/" {{if eq .Page "overview.html"}}class="active"{{end}}>Summary</a>
+      <a href="/mod/admin/checks" {{if eq .Page "checks.html"}}class="active"{{end}}>Endpoints &amp; probes</a>
+    </nav>
+    {{end}}
+    {{if or (eq .Page "tables.html") (eq .Page "table_edit.html") (eq .Page "databases.html") (eq .Page "database_edit.html") (eq .Page "view_edit.html")}}
+    <nav class="tabs">
+      <a href="/mod/admin/endpoints" {{if or (eq .Page "tables.html") (eq .Page "table_edit.html")}}class="active"{{end}}>Local Database</a>
+      <a href="/mod/admin/databases" {{if or (eq .Page "databases.html") (eq .Page "database_edit.html") (eq .Page "view_edit.html")}}class="active"{{end}}>External Database</a>
+    </nav>
+    {{end}}
+    {{if .Message}}<p class="notice">{{.Message}}</p>{{end}}
+    {{template "content" .}}
+  </main>
+  <script src="/mod/static/admin.js"></script>
+</body>
+</html>{{end}}

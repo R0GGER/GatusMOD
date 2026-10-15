@@ -1,0 +1,90 @@
+{{define "content"}}
+<section>
+  <div class="section-head">
+    <h2>External Database</h2>
+    <a class="button" href="/mod/admin/databases/new">Add database</a>
+  </div>
+  {{if .Databases}}
+  {{range .Databases}}
+  <details class="accordion" open>
+    <summary>
+      <span class="accordion-title"><strong>{{.Name}}</strong> <span class="muted small">{{.Provider}} &middot; {{.URL}} &middot; {{len .Views}} tables/views</span></span>
+      <span class="actions">
+        <a class="button" href="/mod/admin/databases/{{.ID}}/views/new">Add table/view</a>
+        <a class="button secondary" href="/mod/admin/databases/{{.ID}}">Edit</a>
+        <form method="post" action="/mod/admin/databases/{{.ID}}/delete" data-confirm="{{.ConfirmDelete}}">
+          <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+          <button type="submit" class="danger">Delete</button>
+        </form>
+      </span>
+    </summary>
+    {{if .Views}}
+    <table class="list db-views">
+      <colgroup>
+        <col class="c-name" /><col class="c-group" /><col class="c-primary" /><col class="c-table" /><col class="c-schedule" /><col class="c-run" /><col class="c-actions" />
+      </colgroup>
+      <thead><tr><th>Name</th><th>Group</th><th>Primary</th><th>Table / view</th><th>Schedule</th><th>Last run</th><th class="right">Actions</th></tr></thead>
+      <tbody>
+      {{range .Views}}
+        <tr>
+          <td>{{.Label}}<br /><span class="muted small"><code>{{.FileName}}</code></span></td>
+          <td>{{if .Group}}{{.Group}}{{else}}<span class="muted">from column</span>{{end}}</td>
+          <td>{{.Type}}</td>
+          <td>{{.TableID}} / {{if .ViewID}}{{.ViewID}}{{else}}-{{end}}</td>
+          <td>{{.Schedule}}<br /><span class="muted small">Next: {{when .Next}}</span></td>
+          <td>
+            {{if .Status.LastRun.IsZero}}<span class="muted">never</span>{{else}}
+            {{when .Status.LastRun}} <span class="muted">({{.Status.Trigger}})</span><br />
+            {{if .Status.Error}}<span class="error small">{{.Status.Error}}</span>
+            {{else}}<span class="muted small">{{.Status.Endpoints}} endpoints from {{.Status.Rows}} rows in {{ms .Status.Duration}}ms</span>{{end}}
+            {{end}}
+          </td>
+          <td class="actions">
+            <form method="post" action="/mod/admin/databases/{{.DatabaseID}}/views/{{.ID}}/run">
+              <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+              <button type="submit">Run</button>
+            </form>
+            <a class="button secondary" href="/mod/admin/databases/{{.DatabaseID}}/views/{{.ID}}">Edit</a>
+            <form method="post" action="/mod/admin/databases/{{.DatabaseID}}/views/{{.ID}}/delete" data-confirm="Delete {{.Label}}? {{.FileName}} is deleted and its endpoints are removed from Gatus.">
+              <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="muted">No tables or views yet. <a href="/mod/admin/databases/{{.ID}}/views/new">Add one</a>: its rows become Gatus endpoints.</p>
+    {{end}}
+  </details>
+  {{end}}
+  {{else}}
+  <p class="muted">No databases yet. Add a Baserow or NocoDB database, then add its tables or views: every row becomes a Gatus endpoint, and every table or view gets its own file.</p>
+  {{end}}
+</section>
+
+{{if .Orphans}}
+<section>
+  <h2>Orphaned files</h2>
+  <p class="muted">These files were generated for a table or view that no longer exists. Gatus still loads their endpoints until you delete them.</p>
+  <table class="list">
+    <thead><tr><th>File</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+    {{range .Orphans}}
+      <tr>
+        <td><code>{{.Name}}</code></td>
+        <td class="actions">
+          <form method="post" action="/mod/admin/databases/files/delete" data-confirm="Delete {{.Name}}? Its endpoints are removed from Gatus.">
+            <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+            <input type="hidden" name="file" value="{{.Name}}" />
+            <button type="submit" class="danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+{{end}}

@@ -1,0 +1,120 @@
+{{define "content"}}
+<form method="post" action="/mod/admin/endpoints/save" class="form" data-table-form>
+<input type="hidden" name="csrf" value="{{.CSRF}}" />
+<input type="hidden" name="id" value="{{.Table.ID}}" />
+<section>
+  <h2>{{if .IsNew}}New table{{else}}Edit table {{.Table.Name}}{{end}}</h2>
+  {{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}
+  {{with .Status}}{{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}{{end}}
+  <div class="grid">
+    <label>Name <input name="name" value="{{.Table.Name}}" required placeholder="servers" /></label>
+    <label>Group <input name="group" value="{{.Table.Group}}" placeholder="Group for rows without a group" data-table-group />
+      <span class="help">Rows with an empty Group cell use this group. Changing it also changes the rows that had the old group.</span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Endpoint settings</h2>
+  <div class="grid">
+    <label>Primary check
+      <select name="type" data-type-select>{{range .Types}}<option value="{{.}}" {{if eq . $.Table.Type}}selected{{end}}>{{.}}</option>{{end}}</select></label>
+    <div>
+      <label>URL template <input name="urlTemplate" id="urlTemplate" value="{{.Table.URLTemplate}}" placeholder="default: {{.DefaultURLTemplate}}" /></label>
+      {{range .TypeHints}}
+      <div class="url-examples" data-type-hint="{{.Type}}" data-default-template="{{.DefaultURL}}" data-default-conditions="{{.DefaultConditions}}" {{if ne .Type $.Table.Type}}hidden{{end}}>
+        {{if .Examples}}<span class="help">Examples (click to use):</span>
+        {{range .Examples}}<button type="button" class="url-example" data-example-template="{{.Template}}"><code>{{.Template}}</code><span>{{.Label}}</span></button>{{end}}{{end}}
+      </div>
+      {{end}}
+      <span class="help">Used when the URL cell of a row is empty. Placeholders: {host}, {port}, {ports}, {group} or any column key.</span>
+    </div>
+    <label>Name template <input name="nameTemplate" value="{{.Table.NameTemplate}}" placeholder="default: {host}" />
+      <span class="help">Used when the Name cell is empty, e.g. {host}:{port}.</span></label>
+    <label>Default ports <input name="defaultPorts" value="{{.Table.DefaultPorts}}" placeholder="e.g. 5201-5210" />
+      <span class="help">Used as {port} when the row has no port. For a range or list the first port is checked; every row gives one endpoint.</span></label>
+    <label>Interval <input name="interval" value="{{.Table.Interval}}" placeholder="{{if .DefaultInterval}}default: {{.DefaultInterval}}{{else}}e.g. 5m{{end}}" />
+      <span class="help">For rows without an interval.</span></label>
+    <label>Conditions
+      <textarea name="conditions" id="conditions" rows="3" spellcheck="false" placeholder="default: {{.DefaultConditions}}">{{.Table.Conditions}}</textarea>
+      <span class="help">One per line, for rows without conditions.</span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Columns</h2>
+  <p class="muted">Gatus endpoint settings, see the <a href="https://gatus.io/docs/endpoints" target="_blank" rel="noopener">Gatus docs</a>.
+    For URLs checked by GatusMOD (iperf3://, ntp://, snmp://, smtp://, databases, push://) only alerts, maintenance windows and <code>heartbeat</code> (in Extra) are used from the other columns.</p>
+  <div class="column-groups">
+    {{range .ColumnGroups}}
+    <fieldset>
+      <legend>{{.Name}}</legend>
+      {{range .Columns}}
+      <label class="check" title="{{.Help}}"><input type="checkbox" name="columns" value="{{.Key}}" data-col-toggle="{{.Key}}" {{if .On}}checked{{end}} {{if .Always}}disabled{{end}} /> {{.Label}}</label>
+      {{end}}
+    </fieldset>
+    {{end}}
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>Endpoints</h2>
+    <button type="button" class="secondary" data-add-row>Add row</button>
+  </div>
+  <div class="cells-wrap">
+    <table class="cells">
+      <thead><tr>{{range .Header}}<th data-col="{{.Key}}" title="{{.Help}}" {{if not .On}}hidden{{end}}>{{.Label}}</th>{{end}}<th></th></tr></thead>
+      <tbody id="rows" data-next="{{len .Rows}}">
+        {{range .Rows}}{{template "row" .}}{{end}}
+      </tbody>
+    </table>
+  </div>
+  <template id="row-template">{{template "row" .Template}}</template>
+  <p class="muted small">Hover a column name for help. Empty rows are dropped when saving.
+    {{if not .IsNew}}{{.Valid}} valid endpoints.{{end}}</p>
+  {{if .Problems}}
+  <h3>Rows that are skipped</h3>
+  <ul class="problems">{{range .Problems}}<li>{{.}}</li>{{end}}</ul>
+  {{end}}
+</section>
+
+<div id="preview-result">
+{{if .Previewed}}
+<section>
+  <h2>Preview</h2>
+  {{if .Preview}}
+  <p>{{.Valid}} valid endpoints. The first {{len .Preview}}; nothing is saved yet, click <em>Save</em> to keep these settings.</p>
+  <table class="list">
+    <thead><tr><th>Group</th><th>Name</th><th>URL</th><th>Interval</th><th>Conditions</th></tr></thead>
+    <tbody>
+    {{range .Preview}}
+      <tr><td>{{.Group}}</td><td>{{.Name}}</td><td><code>{{redact .URL}}</code></td><td>{{if .Interval}}{{.Interval}}{{else}}<span class="muted">default</span>{{end}}</td><td><pre>{{.Conditions}}</pre></td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}<p class="notice error">No row gives a valid endpoint. See the skipped rows above.</p>{{end}}
+</section>
+{{end}}
+</div>
+
+<div class="form-actions">
+  <button type="submit" name="action" value="save">Save</button>
+  <button type="submit" name="action" value="preview" class="secondary" formnovalidate formaction="/mod/admin/endpoints/save#preview-result" data-busy-label="Loading...">Preview</button>
+  <a href="/mod/admin/endpoints">Cancel</a>
+</div>
+</form>
+{{end}}
+
+{{define "row"}}<tr>
+  {{range .Cells}}<td data-col="{{.Key}}" {{if not .On}}hidden{{end}} {{if .Error}}class="invalid"{{end}}>
+    {{if eq .Kind "bool"}}{{if eq .Key "enabled"}}<input type="hidden" name="{{.Name}}" value="false" />{{end}}<input type="checkbox" name="{{.Name}}" value="true" {{if .Value}}checked{{end}} {{if eq .Key "enabled"}}data-default-on{{end}} />
+    {{else if eq .Kind "select"}}{{$v := .Value}}<select name="{{.Name}}"><option value=""></option>{{range .Options}}<option {{if eq . $v}}selected{{end}}>{{.}}</option>{{end}}</select>
+    {{else if or (eq .Kind "multiline") (eq .Kind "yaml")}}<textarea name="{{.Name}}" rows="1" spellcheck="false">{{.Value}}</textarea>
+    {{else}}<input name="{{.Name}}" value="{{.Value}}" autocomplete="off" spellcheck="false" />{{end}}
+    {{if .Error}}<span class="cell-error">{{.Error}}</span>{{end}}
+  </td>{{end}}
+  <td class="row-actions">
+    <button type="button" class="secondary" data-row-copy title="Duplicate this row">Copy</button>
+    <button type="button" class="danger" data-row-delete title="Delete this row">Delete</button>
+  </td>
+</tr>{{end}}

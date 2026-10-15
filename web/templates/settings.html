@@ -1,0 +1,101 @@
+{{define "content"}}
+<form method="post" action="/mod/admin/settings" class="form">
+<input type="hidden" name="csrf" value="{{.CSRF}}" />
+{{with .General}}
+<section>
+  <h2>General</h2>
+  {{if $.Error}}<p class="notice error">{{$.Error}}</p>{{end}}
+  <p class="muted">{{if $.Overridden}}These values are saved in the admin settings and override the <code>gatusmod:</code> block in config.yaml.{{else}}These values come from config.yaml. Saving stores them in the admin settings, which then override config.yaml.{{end}}</p>
+  <div class="grid">
+    <label>Base URL <input name="baseUrl" value="{{.BaseURL}}" placeholder="https://status.example.com" />
+      <span class="help">Replaces [baseurl] and is used for badge URLs.</span></label>
+    <label>Default interval <input name="defaultInterval" value="{{.DefaultInterval}}" placeholder="Gatus default (60s)" />
+      <span class="help">For generated endpoints without an interval of their own (row, table or view), e.g. 2m.</span></label>
+    <label>Items per page <input type="number" min="0" name="itemsPerPage" value="{{.ItemsPerPage}}" />
+      <span class="help">Endpoints per dashboard page; 0 = Gatus default (96).</span></label>
+    <div>
+      <label class="check"><input type="checkbox" name="headingShow" {{if .HeadingShow}}checked{{end}} /> Show the dashboard heading</label>
+      <label class="check"><input type="checkbox" name="subtitleShow" {{if .SubtitleShow}}checked{{end}} /> Show the subtitle</label>
+    </div>
+    <label>Clock
+      <select name="timeFormat">
+        <option value="" {{if eq .TimeFormat ""}}selected{{end}}>Browser default</option>
+        <option value="24h" {{if eq .TimeFormat "24h"}}selected{{end}}>24-hour (16:26:24)</option>
+        <option value="12h" {{if eq .TimeFormat "12h"}}selected{{end}}>12-hour (4:26:24 PM)</option>
+      </select>
+      <span class="help">Time format of the timestamps on the dashboard.</span></label>
+    <label>Date notation
+      <select name="dateFormat">
+        <option value="" {{if eq .DateFormat ""}}selected{{end}}>Browser default</option>
+        <option value="DD/MM/YYYY" {{if eq .DateFormat "DD/MM/YYYY"}}selected{{end}}>DD/MM/YYYY (14/10/2026)</option>
+        <option value="MM/DD/YYYY" {{if eq .DateFormat "MM/DD/YYYY"}}selected{{end}}>MM/DD/YYYY (10/14/2026)</option>
+      </select>
+      <span class="help">Date format of the timestamps on the dashboard.</span></label>
+    <label class="wide">Footer (HTML)
+      <textarea name="footer" rows="3" spellcheck="false">{{.Footer}}</textarea>
+      <span class="help">Replaces the "Powered by Gatus" line. [baseurl] is replaced.</span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Favicons</h2>
+  <div class="grid">
+    <label>Default (.ico) <input name="favicon_default" value="{{.Favicon.Default}}" placeholder="/favicon/favicon.ico" /></label>
+    <label>16x16 <input name="favicon_16" value="{{.Favicon.Size16x16}}" placeholder="/favicon/favicon_16.png" /></label>
+    <label>32x32 <input name="favicon_32" value="{{.Favicon.Size32x32}}" placeholder="/favicon/favicon_32.png" /></label>
+    <label>Apple touch <input name="favicon_apple" value="{{.Favicon.AppleTouch}}" placeholder="/favicon/favicon_256.png" /></label>
+    <label>192x192 <input name="favicon_192" value="{{.Favicon.Size192x192}}" placeholder="/favicon/favicon_256.png" /></label>
+    <label>512x512 <input name="favicon_512" value="{{.Favicon.Size512x512}}" placeholder="/favicon/favicon_512.png" /></label>
+  </div>
+</section>
+
+<section>
+  <h2>Analytics</h2>
+  <div class="grid">
+    <label class="check"><input type="checkbox" name="analyticsEnabled" {{if .AnalyticsEnabled}}checked{{end}} /> Enable analytics</label>
+    <label>Provider
+      <select name="analyticsProvider">
+        <option value="umami" {{if eq .AnalyticsProvider "umami"}}selected{{end}}>Umami</option>
+        <option value="plausible" {{if eq .AnalyticsProvider "plausible"}}selected{{end}}>Plausible</option>
+      </select></label>
+    <label>Script URL <input name="analyticsScript" value="{{.AnalyticsScript}}" placeholder="https://umami.example.com/script.js" /></label>
+    <label>Site ID <input name="analyticsSite" value="{{.AnalyticsSite}}" />
+      <span class="help">Umami: the website ID. Plausible: the domain.</span></label>
+  </div>
+</section>
+{{end}}
+<div class="form-actions">
+  <button type="submit">Save settings</button>
+</div>
+</form>
+
+{{if .Overridden}}
+<section>
+  <h2>Reset</h2>
+  <form method="post" action="/mod/admin/settings/reset" data-confirm="Use the values from config.yaml again?">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <p class="muted">Removes the saved general settings, so config.yaml is used again. Databases, tables and the password are kept.</p>
+    <button type="submit" class="secondary">Use config.yaml again</button>
+  </form>
+</section>
+{{end}}
+
+<section>
+  <h2>Admin password</h2>
+  {{if .PasswordError}}<p class="notice error">{{.PasswordError}}</p>{{end}}
+  <p class="muted">{{if .PasswordFromSettings}}The password was changed here and overrides <code>admin.password-bcrypt</code> in config.yaml.{{else}}The password comes from <code>admin.password-bcrypt</code> in config.yaml.{{end}}
+    Changing it logs out every other session.</p>
+  <form method="post" action="/mod/admin/settings/password" class="form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <div class="grid">
+      <label>Current password <input type="password" name="current" autocomplete="current-password" required /></label>
+      <span></span>
+      <label>New password <input type="password" name="new" minlength="10" autocomplete="new-password" required /></label>
+      <label>Repeat new password <input type="password" name="confirm" minlength="10" autocomplete="new-password" required /></label>
+    </div>
+    <button type="submit">Change password</button>
+  </form>
+</section>
+
+<p class="muted small">Admin settings file: <code>{{.SettingsPath}}</code></p>
+{{end}}

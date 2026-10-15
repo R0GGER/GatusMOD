@@ -1,0 +1,85 @@
+{{define "content"}}
+<section>
+  <h2>Sync</h2>
+  {{if .Status.Enabled}}
+  <table class="kv">
+    <tr><th>Tables / views</th><td>{{len .Imports}} configured <a href="/mod/admin/databases">(manage databases)</a></td></tr>
+    <tr><th>Generated files</th><td><code>{{.Status.OutputPath}}</code> <span class="muted">(local tables)</span>
+      {{range .Imports}}{{if .FileName}}<br /><code>{{.FileName}}</code> <span class="muted">({{.Label}})</span>{{end}}{{end}}</td></tr>
+    <tr><th>Last write attempt</th><td>{{since .Status.LastRun}}</td></tr>
+    <tr><th>Last file change</th><td>{{since .Status.LastWrite}} <span class="muted">Gatus reloads within 30 seconds after a change.</span></td></tr>
+    <tr><th>Rows / endpoints</th><td>{{.Status.Records}} rows, {{.Status.Endpoints}} valid endpoints</td></tr>
+    <tr><th>Default interval</th><td>{{if .Config.Defaults.Interval}}{{.Config.Defaults.Interval}}{{else}}Gatus default (60s){{end}}</td></tr>
+    {{if .Status.LastError}}<tr><th>Last error</th><td class="error">{{.Status.LastError}}</td></tr>{{end}}
+  </table>
+  <form method="post" action="/mod/admin/sync">
+    <input type="hidden" name="csrf" value="{{.CSRF}}" />
+    <button type="submit">Read all tables now</button>
+  </form>
+  {{range .Imports}}{{if .Status.Error}}<p class="notice error">{{.Label}}: {{.Status.Error}}</p>{{end}}{{end}}
+  {{if .Status.Problems}}
+  <h3>Skipped rows</h3>
+  <ul class="problems">{{range .Status.Problems}}<li><strong>{{.Record}}</strong>: {{.Message}}</li>{{end}}</ul>
+  {{end}}
+  {{else}}
+  <p class="muted">No tables configured. <a href="/mod/admin/databases/new">Add a database</a> to manage endpoints in Baserow or NocoDB, or <a href="/mod/admin/endpoints/new">add a local table</a>.</p>
+  {{end}}
+</section>
+
+{{if or .Summary.Endpoints .Summary.Probes}}
+<section>
+  <h2>Endpoints &amp; probes</h2>
+  <table class="kv">
+    <tr><th>Generated endpoints</th><td>{{.Summary.Endpoints}}
+      <span class="muted">({{.Summary.Enabled}} enabled{{if .Summary.Disabled}}, <a href="/mod/admin/checks?state=disabled">{{.Summary.Disabled}} disabled</a>{{else}}, 0 disabled{{end}})</span></td></tr>
+    <tr><th>Probes</th><td>{{.Summary.Probes}}
+      {{if .Summary.Probes}}<span class="tag on">{{.Summary.Up}} up</span>
+      {{if .Summary.Down}}<a href="/mod/admin/checks?state=down" class="tag down">{{.Summary.Down}} down</a>{{end}}
+      {{if .Summary.Pending}}<a href="/mod/admin/checks?state=pending" class="tag off">{{.Summary.Pending}} not checked yet</a>{{end}}{{end}}</td></tr>
+  </table>
+  {{if .Attention}}
+  <h3>Probes that need attention</h3>
+  {{template "probeTable" .Attention}}
+  {{else if .Summary.Probes}}
+  <p class="muted">No probes are down.</p>
+  {{end}}
+  <p><a href="/mod/admin/checks">Show all endpoints and probes &rarr;</a></p>
+</section>
+{{end}}
+
+<section>
+  <h2>UI patches</h2>
+  <p class="muted">Result of the latest patch of each Gatus resource. A missing patch usually means the Gatus UI changed after an upgrade.</p>
+  {{if .Patches}}
+  <table class="list">
+    <thead><tr><th>Resource</th><th>Applied</th><th>Missing</th><th>Checked</th></tr></thead>
+    <tbody>
+    {{range .Patches}}
+      <tr>
+        <td><code>{{.Resource}}</code></td>
+        <td>{{join .Entry.Report.Applied ", "}}</td>
+        <td class="error">{{join .Entry.Report.Missing ", "}}</td>
+        <td>{{since .Entry.Time}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No pages patched yet.</p>
+  {{end}}
+</section>
+
+<section>
+  <h2>Configuration</h2>
+  <table class="kv">
+    <tr><th>Configuration path</th><td><code>{{.Config.Path}}</code></td></tr>
+    <tr><th>Admin settings file</th><td><code>{{.SettingsPath}}</code></td></tr>
+    <tr><th>Upstream</th><td><code>{{.Config.Upstream}}</code></td></tr>
+    <tr><th>Base URL</th><td><code>{{.Config.BaseURL}}</code></td></tr>
+    <tr><th>Items per page</th><td>{{if .Config.UI.ItemsPerPage}}{{.Config.UI.ItemsPerPage}}{{else}}Gatus default (96){{end}}</td></tr>
+    <tr><th>Heading / subtitle</th><td>{{if .Config.UI.HeadingVisible}}shown{{else}}hidden{{end}} / {{if .Config.UI.SubtitleVisible}}shown{{else}}hidden{{end}}</td></tr>
+    <tr><th>Analytics</th><td>{{if .Config.Analytics}}{{.Config.Analytics.Provider}}{{else}}off{{end}}</td></tr>
+  </table>
+  <p class="muted">Change these on the <a href="/mod/admin/settings">Settings</a> page.</p>
+</section>
+{{end}}

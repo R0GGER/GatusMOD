@@ -1,0 +1,58 @@
+name: gatusmod-e2e
+
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    ports:
+      - "18081:8080"
+    volumes:
+      - nocodb-data:/usr/app/data
+
+  gatus:
+    image: twinproduction/gatus:v5.37.0
+    environment:
+      GATUS_CONFIG_PATH: /config
+    volumes:
+      - ./.run/config:/config
+
+  gatusmod:
+    build: ..
+    depends_on:
+      - gatus
+    ports:
+      - "18080:8080"
+    environment:
+      GATUSMOD_CONFIG_PATH: /config
+      E2E_DB_PASSWORD: e2e-db-pass
+    volumes:
+      - ./.run/config:/config
+      - ./.run/images:/images:ro
+      - ./.run/public:/public:ro
+
+  # Servers for the checks GatusMOD runs itself.
+  iperf3:
+    image: networkstatic/iperf3:latest
+    command: ["-s"]
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: e2e-db-pass
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: e2e-db-pass
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "e2e-db-pass"]
+
+  mongo:
+    image: mongo:8
+
+  mailpit:
+    image: axllent/mailpit:latest
+
+volumes:
+  nocodb-data:

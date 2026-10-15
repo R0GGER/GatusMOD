@@ -1,0 +1,36 @@
+# Gatus configuration. Gatus ignores the `gatusmod:` block; GatusMOD only reads that block.
+# Keep the old configuration running when a (generated) file is invalid instead of crashing Gatus.
+skip-invalid-config-update: true
+
+storage:
+  type: sqlite
+  path: /data/data.db
+
+ui:
+  title: Status | Example
+  dashboard-heading: Status
+  dashboard-subheading: Live status of our services
+
+gatusmod:
+  upstream: http://gatus:8080
+  base-url: http://localhost:8080
+  public-dir: /public
+  defaults:
+    interval: 1m
+  ui:
+    items-per-page: 6
+    dashboard-heading-show: true
+    subtitle-show: true
+    favicon:
+      default: "[baseurl]/favicon/favicon.ico"
+      size16x16: "[baseurl]/favicon/gatusmod_16.png"
+      size32x32: "[baseurl]/favicon/gatusmod_32.png"
+      apple-touch: "[baseurl]/favicon/gatusmod_256.png"
+      size192x192: "[baseurl]/favicon/gatusmod_192.png"
+      size512x512: "[baseurl]/favicon/gatusmod_512.png"
+    footer: '<p>Powered by <b><a href="https://github.com/r0gger/gatusmod" target="_blank">GatusMOD</a></b>, a modification of <b><a href="https://github.com/TwiN/gatus" target="_blank">Gatus</a></b> | <a href="/mod/admin/login">Admin</a></p>' 
+  admin:
+    username: admin
+    # generate with: docker compose run --rm gatusmod hash-password 'your-password'
+    # Example Password: GatusMOD
+    password-bcrypt: "$$2a$$10$$MEgbfPyEPuXmaLIeW7J/o.fIy5L2S9Tt1kBYIA1oWQwWabHGbHoXC"

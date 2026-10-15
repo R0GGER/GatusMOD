@@ -1,0 +1,7 @@
+.cursor/
+.env
+.plan/
+config/settings.json
+e2e/.run/
+gatusmod
+gatusmod.exe

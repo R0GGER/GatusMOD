@@ -1,0 +1,53 @@
+{{define "content"}}
+<section>
+  <h2>Endpoints &amp; probes</h2>
+  <div class="check-filter">
+    <input type="search" id="check-search" placeholder="Search by group, name or URL" autocomplete="off" />
+    <select id="check-state">
+      <option value="">All</option>
+      <option value="problem">Problems (down or not checked yet)</option>
+      <option value="up">Up</option>
+      <option value="down">Down</option>
+      <option value="pending">Not checked yet</option>
+      <option value="enabled">Enabled endpoints</option>
+      <option value="disabled">Disabled endpoints</option>
+    </select>
+    <span class="muted small" id="check-status"></span>
+  </div>
+</section>
+
+<section>
+  <h2>Generated endpoints <span class="muted small">{{.Summary.Endpoints}} ({{.Summary.Enabled}} enabled, {{.Summary.Disabled}} disabled)</span></h2>
+  <p class="muted">Endpoints Gatus checks itself, generated from the local and external tables.</p>
+  {{if .Records}}
+  <table class="list" data-check-table>
+    <thead><tr><th>Source</th><th>Group</th><th>Name</th><th>URL</th><th>Interval</th><th>Conditions</th><th>Status</th></tr></thead>
+    <tbody>
+    {{range .Records}}
+      <tr data-search="{{.SourceName}} {{.Group}} {{.Name}} {{redact .URL}}" data-state="{{if .Disabled}}disabled{{else}}enabled{{end}}">
+        <td>{{.SourceName}}</td>
+        <td>{{.Group}}</td>
+        <td>{{.Name}}</td>
+        <td><code>{{redact .URL}}</code></td>
+        <td>{{if .Interval}}{{.Interval}}{{else}}<span class="muted">default</span>{{end}}</td>
+        <td><pre>{{.Conditions}}</pre></td>
+        <td>{{if .Disabled}}<span class="tag off">disabled</span>{{else}}<span class="tag on">enabled</span>{{end}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No generated endpoints.</p>
+  {{end}}
+</section>
+
+<section>
+  <h2>Probes <span class="muted small">{{.Summary.Probes}} ({{.Summary.Up}} up, {{.Summary.Down}} down, {{.Summary.Pending}} not checked yet)</span></h2>
+  <p class="muted">Endpoints GatusMOD checks itself (iperf3, NTP, SNMP, SMTP, databases) or receives pushes for. The results are sent to Gatus as external endpoints.</p>
+  {{if .Probes}}
+  <div data-check-table>{{template "probeTable" .Probes}}</div>
+  {{else}}
+  <p class="muted">No probes.</p>
+  {{end}}
+</section>
+{{end}}

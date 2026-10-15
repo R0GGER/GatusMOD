@@ -1,0 +1,75 @@
+{{define "content"}}
+<section>
+  <h2>Embed badge</h2>
+  <p class="muted">A public badge with the average uptime of several endpoints, for use in a README or on another website.
+    The badge itself is publicly accessible; only this configuration page is behind the admin login.</p>
+  {{with .Embed}}
+  <form method="get" action="/mod/admin/badges" class="embed-form">
+    <input type="hidden" name="duration" value="{{$.Duration}}" />
+    <input type="hidden" name="badgeStyle" value="{{$.BadgeStyle}}" />
+    <input type="hidden" name="q" value="" data-keep-query />
+    <label>Period
+      <select name="embedDuration" data-autosubmit>{{range $.Periods}}<option value="{{.Value}}" {{if eq .Value $.Embed.Duration}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <label>Style
+      <select name="style" data-autosubmit>{{range $.StyleOpts}}<option value="{{.Value}}" {{if eq .Value $.Embed.Style}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <label>Content
+      <select name="content" data-autosubmit>{{range $.Contents}}<option value="{{.Value}}" {{if eq .Value $.Embed.Content}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <label>Check
+      <select name="check" data-autosubmit>{{range .Checks}}<option value="{{.Value}}" {{if eq .Value $.Embed.Check}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <label>Snippet
+      <select name="snippet" data-autosubmit>{{range $.Snippets}}<option value="{{.Value}}" {{if eq .Value $.Embed.Snippet}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <noscript><button type="submit">Update</button></noscript>
+  </form>
+  <div class="embed-preview"><img src="{{.URL}}" alt="Uptime badge" /></div>
+  <div class="badge-codes">
+    <label><input readonly value="{{.Code}}" /><button type="button" data-copy>Copy</button></label>
+  </div>
+  {{end}}
+</section>
+
+<section>
+  <h2>Badges per endpoint</h2>
+  <p>Embed codes for the badges Gatus serves for each endpoint.
+    {{if .Source}}<span class="muted">Endpoints from: {{.Source}}.</span>{{end}}</p>
+  {{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}
+  <form method="get" action="/mod/admin/badges" class="embed-form">
+    <input type="hidden" name="q" value="" data-keep-query />
+    {{with .Embed}}
+    <input type="hidden" name="embedDuration" value="{{.Duration}}" />
+    <input type="hidden" name="style" value="{{.Style}}" />
+    <input type="hidden" name="content" value="{{.Content}}" />
+    <input type="hidden" name="check" value="{{.Check}}" />
+    <input type="hidden" name="snippet" value="{{.Snippet}}" />
+    {{end}}
+    <label>Period
+      <select name="duration" data-autosubmit>{{range .Periods}}<option value="{{.Value}}" {{if eq .Value $.Duration}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <label>Style
+      <select name="badgeStyle" data-autosubmit>{{range .StyleOpts}}<option value="{{.Value}}" {{if eq .Value $.BadgeStyle}}selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    <noscript><button type="submit">Update</button></noscript>
+  </form>
+  {{if .Endpoints}}
+  <div class="badge-search">
+    <input type="search" id="badge-search" placeholder="Search endpoint by name, group or key" list="badge-endpoints" autocomplete="off" />
+    <span class="muted small" id="badge-search-status"></span>
+  </div>
+  <datalist id="badge-endpoints">{{range .Endpoints}}<option value="{{.Key}}">{{if .Group}}{{.Group}} / {{end}}{{.Name}}</option>{{end}}</datalist>
+  {{end}}
+  {{range .Endpoints}}
+  <article class="badge-card" data-search="{{.Group}} {{.Name}} {{.Key}}" hidden>
+    <h3>{{if .Group}}{{.Group}} / {{end}}{{.Name}} <code class="muted">{{.Key}}</code></h3>
+    {{range .Badges}}
+    <div class="badge-row">
+      <div class="badge-preview"><span class="muted">{{.Label}}</span><img src="{{.URL}}" alt="{{.Label}}" loading="lazy" /></div>
+      <div class="badge-codes">
+        <label>Markdown <input readonly value="{{.Markdown}}" /><button type="button" data-copy>Copy</button></label>
+        <label>HTML <input readonly value="{{.HTML}}" /><button type="button" data-copy>Copy</button></label>
+        <label>URL <input readonly value="{{.URL}}" /><button type="button" data-copy>Copy</button></label>
+      </div>
+    </div>
+    {{end}}
+  </article>
+  {{else}}
+  <p class="muted">No endpoints found.</p>
+  {{end}}
+</section>
+{{end}}

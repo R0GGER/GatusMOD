@@ -1,0 +1,36 @@
+{{define "content"}}
+<section>
+  <div class="section-head">
+    <h2>Local Database</h2>
+    <a class="button" href="/mod/admin/endpoints/new">Add table</a>
+  </div>
+  {{if .Tables}}
+  <table class="list">
+    <thead><tr><th>Name</th><th>Group</th><th>Check</th><th>Columns</th><th>Rows</th><th>Endpoints</th><th>Last read</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+    {{range .Tables}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td>{{if .Group}}{{.Group}}{{else}}<span class="muted">per row</span>{{end}}</td>
+        <td>{{.Type}}</td>
+        <td class="small">{{join .Columns ", "}}</td>
+        <td>{{len .Rows}}</td>
+        <td>{{.Status.Endpoints}}{{if .Status.Error}}<br /><span class="error small">{{.Status.Error}}</span>{{end}}</td>
+        <td>{{when .Status.LastRun}}</td>
+        <td class="actions">
+          <a class="button secondary" href="/mod/admin/endpoints/{{.ID}}">Edit</a>
+          <form method="post" action="/mod/admin/endpoints/{{.ID}}/delete" data-confirm="Delete table {{.Name}}? Its endpoints are removed from Gatus.">
+            <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+            <button type="submit" class="danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No tables yet. A table holds endpoints you edit here, without NocoDB or Baserow. Every row becomes a Gatus endpoint;
+    URLs such as iperf3://, ntp://, snmp://, smtp://, postgres:// or push:// are checked by GatusMOD.</p>
+  {{end}}
+</section>
+{{end}}

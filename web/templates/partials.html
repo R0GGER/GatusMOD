@@ -1,0 +1,22 @@
+{{define "probeTable"}}
+<table class="list">
+  <thead><tr><th>Group</th><th>Name</th><th>Check</th><th>Last result</th><th>Values</th><th>Last / next run</th></tr></thead>
+  <tbody>
+  {{range .}}
+    <tr data-search="{{.Target.Group}} {{.Target.Name}} {{redact .Target.URL}}" data-state="{{.State}}">
+      <td>{{.Target.Group}}</td>
+      <td>{{.Target.Name}}</td>
+      <td>{{if .Push}}
+        <div class="badge-codes"><label><input readonly value="{{.PushURL}}" /><button type="button" data-copy>Copy</button></label></div>
+        <span class="muted">Call with <code>?status=up</code> or <code>?status=down&amp;msg=...</code>, optional <code>&amp;ping=</code>ms. Down without a push within {{.Target.Interval}}.</span>
+        {{else}}<code>{{redact .Target.URL}}</code> <span class="muted">every {{.Target.Interval}}</span>{{end}}</td>
+      <td>{{if .Last.Time.IsZero}}<span class="muted">{{if .Push}}no push yet{{else}}not checked yet{{end}}</span>
+        {{else if .Last.Success}}<span class="tag on">up</span>{{else}}<span class="tag down">down</span> <span class="error">{{.Last.Error}}</span>{{end}}
+        {{if .PushError}}<div class="error">Gatus: {{.PushError}}</div>{{end}}</td>
+      <td><code>{{.Last.Values}}</code></td>
+      <td class="nowrap">{{when .Last.Time}}{{if not .Push}}<br /><span class="muted">next {{when .Next}}</span>{{end}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+{{end}}

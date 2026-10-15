@@ -1,0 +1,92 @@
+{{define "content"}}
+<section>
+  <h2>Status pages</h2>
+  <p class="muted">A status page shows only the endpoints of the chosen groups and single endpoints, with its own title and heading. It is always available at
+    <code>/status/&lt;slug&gt;</code> on this site. On its own domains it is the whole site: only its endpoints can be read there,
+    and the admin and the badges are not available.</p>
+  <p class="muted">A status page with a password is <b>private</b>: visitors log in with that password, and its endpoints are hidden
+    on this site, in its API and badges, and on the other status pages.</p>
+  {{if .StatusPages}}
+  <table class="list">
+    <thead><tr><th>Slug</th><th>Access</th><th>Groups</th><th>Domains</th><th>Title</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+    {{range .StatusPages}}
+      <tr>
+        <td><a href="{{.URL}}" target="_blank">{{.Slug}}</a><br /><span class="muted small">{{.URL}}</span></td>
+        <td>{{if .Private}}Private{{else}}Public{{end}}</td>
+        <td>{{join .Groups ", "}}{{if .Endpoints}}{{if .Groups}}<br />{{end}}<span class="muted small">+ {{len .Endpoints}} endpoint{{if ne (len .Endpoints) 1}}s{{end}}</span>{{end}}</td>
+        <td>{{range .Domains}}<a href="https://{{.}}/" target="_blank">{{.}}</a><br />{{else}}<span class="muted">none</span>{{end}}</td>
+        <td>{{if .Title}}{{.Title}}{{else}}<span class="muted">site title</span>{{end}}</td>
+        <td class="actions">
+          <a class="button secondary" href="/mod/admin/status-pages?statusPage={{.ID}}#status-page-form">Edit</a>
+          <form method="post" action="/mod/admin/status-pages/{{.ID}}/delete" data-confirm="Delete the status page {{.Slug}}? Domains that still point to GatusMOD then show the whole dashboard.">
+            <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+            <button type="submit" class="danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No status pages yet.</p>
+  {{end}}
+</section>
+
+{{with .StatusPageForm}}
+<section id="status-page-form">
+  <h2>{{if .ID}}Edit status page {{.Slug}}{{else}}Add a status page{{end}}</h2>
+  {{if $.StatusPageError}}<p class="notice error">{{$.StatusPageError}}</p>{{end}}
+  <form method="post" action="/mod/admin/status-pages" class="form">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+    <input type="hidden" name="id" value="{{.ID}}" />
+    <div class="grid">
+      <label>Slug <input name="slug" value="{{.Slug}}" placeholder="customer-a" pattern="[a-z0-9]+(-[a-z0-9]+)*" required />
+        <span class="help">Lowercase letters, digits and dashes; the page is at /status/&lt;slug&gt;.</span></label>
+      <label>Title <input name="title" value="{{.Title}}" placeholder="Site title" />
+        <span class="help">Browser tab title. Empty: the title of this site.</span></label>
+      <label>Heading <input name="heading" value="{{.Heading}}" placeholder="Dashboard heading" />
+        <span class="help">Empty: the dashboard heading of this site.</span></label>
+      <label>Subheading <input name="subheading" value="{{.Subheading}}" placeholder="Dashboard subheading" />
+        <span class="help">Empty: the dashboard subheading of this site.</span></label>
+      <div>
+        <span class="muted small">Groups</span>
+        {{range .Groups}}
+        <label class="check"><input type="checkbox" name="group" value="{{.Name}}" {{if .Checked}}checked{{end}} /> {{.Name}}</label>
+        {{else}}
+        <p class="muted small">Gatus has no groups yet.</p>
+        {{end}}
+        <label>Other groups <input name="otherGroups" value="{{.OtherGroups}}" placeholder="group-a, group-b" />
+          <span class="help">Comma-separated, for groups Gatus does not know yet.</span></label>
+      </div>
+      <div>
+        <span class="muted small">Single endpoints (in addition to the groups)</span>
+        {{range .Endpoints}}
+        <details class="accordion" {{if .Open}}open{{end}}>
+          <summary><span class="accordion-title">{{if .Group}}{{.Group}}{{else}}(no group){{end}}</span></summary>
+          <p>{{range .Endpoints}}<label class="check"><input type="checkbox" name="endpoint" value="{{.Key}}" {{if .Checked}}checked{{end}} /> {{.Name}}</label>{{end}}</p>
+        </details>
+        {{else}}
+        <p class="muted small">Gatus has no endpoints yet.</p>
+        {{end}}
+        <label>Other endpoints <input name="otherEndpoints" value="{{.OtherEndpoints}}" placeholder="group_name, other-group_name" />
+          <span class="help">Comma-separated endpoint keys (&lt;group&gt;_&lt;name&gt;), for endpoints Gatus does not know yet.</span></label>
+      </div>
+      <div>
+        <label>Password <input type="password" name="password" autocomplete="new-password" minlength="10"
+          placeholder="{{if .Private}}leave empty to keep{{else}}empty: public page{{end}}" />
+          <span class="help">{{if .Private}}This page is private. Enter a new password to change it (all visitors are logged out).{{else}}At least 10 characters. With a password the page is private.{{end}}</span></label>
+        {{if .Private}}<label class="check"><input type="checkbox" name="removePassword" /> Remove the password (make the page public)</label>{{end}}
+      </div>
+      <label>Domains
+        <textarea name="domains" rows="4" spellcheck="false" placeholder="status.customer-a.com">{{.Domains}}</textarea>
+        <span class="help">One per line, without https:// or a path. Point the DNS record of each domain (and your TLS / reverse proxy, which must pass the Host header) to GatusMOD.</span></label>
+    </div>
+    <div class="form-actions">
+      <button type="submit">{{if .ID}}Save status page{{else}}Add status page{{end}}</button>
+      {{if .ID}}<a class="button secondary" href="/mod/admin/status-pages">Cancel</a>{{end}}
+    </div>
+  </form>
+</section>
+{{end}}
+{{end}}

@@ -1,0 +1,29 @@
+{{define "content"}}
+<form method="post" action="/mod/admin/databases/save" class="form">
+<input type="hidden" name="csrf" value="{{.CSRF}}" />
+<input type="hidden" name="id" value="{{.Database.ID}}" />
+{{with .Database}}
+<section>
+  <h2>{{if $.IsNew}}New database{{else}}Edit database {{.Name}}{{end}}</h2>
+  {{if $.Error}}<p class="notice error">{{$.Error}}</p>{{end}}
+  <div class="grid">
+    <label>Name <input name="name" value="{{.Name}}" required placeholder="NocoDB-prod" />
+      <span class="help">Shown before the name of every table or view, e.g. <code>NocoDB-prod:http-sites</code>, and used in their file names.</span></label>
+    <label>Provider
+      <select name="provider">{{range $.Providers}}<option value="{{.}}" {{if eq . $.Database.Provider}}selected{{end}}>{{.}}</option>{{end}}</select>
+    </label>
+    <label>API URL <input name="url" value="{{.URL}}" required placeholder="https://nocodb.example.com" />
+      <span class="help">The site or API URL; a trailing /api is fine.</span></label>
+    <label>Token
+      <input type="password" name="token" value="{{$.TypedToken}}" autocomplete="new-password" placeholder="{{if $.HasToken}}Leave empty to keep the current token{{else}}Baserow database token or NocoDB API token{{end}}" />
+      <span class="help">Stored in the admin settings file and never shown again.</span></label>
+  </div>
+</section>
+{{end}}
+
+<div class="form-actions">
+  <button type="submit">Save</button>
+  <a href="/mod/admin/databases">Cancel</a>
+</div>
+</form>
+{{end}}

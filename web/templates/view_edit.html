@@ -1,0 +1,113 @@
+{{define "content"}}
+<form method="post" action="/mod/admin/databases/{{.Database.ID}}/views/save" class="form">
+<input type="hidden" name="csrf" value="{{.CSRF}}" />
+<input type="hidden" name="id" value="{{.Import.ID}}" />
+{{with .Import}}
+<section>
+  <h2>{{if $.IsNew}}New table/view of {{$.Database.Name}}{{else}}Edit {{$.Label}}{{end}}</h2>
+  {{if $.Error}}<p class="notice error">{{$.Error}}</p>{{end}}
+  <p class="muted">Database <strong>{{$.Database.Name}}</strong> ({{$.ProviderTitle}}, <code>{{$.Database.URL}}</code>). <a href="/mod/admin/databases/{{$.Database.ID}}">Edit the database</a> to change the API URL or token.</p>
+  <div class="grid">
+    <label>Name <input name="name" value="{{.Name}}" required placeholder="http-sites" />
+      <span class="help">Shown as <code>{{$.Database.Name}}:name</code>.{{if $.FileName}} The endpoints are written to <code>{{$.FileName}}</code>.{{else}} The endpoints are written to a file named after it.{{end}}</span></label>
+    <label>Group <input name="group" value="{{.Group}}" placeholder="Group for all endpoints (unless a group column is mapped)" /></label>
+    <label>Table ID <input name="tableId" value="{{.TableID}}" required placeholder="NocoDB: m1a2b3c4d5e6f7g, Baserow: 123, or the table URL" />
+      <span class="help">NocoDB: <em>Details &gt; API snippets</em> of the table (starts with m). Baserow: the number after /table/ in the URL.
+        Pasting the URL of the table (or view) in the browser also works.</span></label>
+    <label>View ID <input name="viewId" value="{{.ViewID}}" placeholder="optional: only rows in this view" />
+      <span class="help">NocoDB starts with vw. Filled in from a pasted view URL.</span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Column mapping</h2>
+  <p class="muted">Enter a <strong>column name</strong> of your table in each field, not a value. Leave empty to use the templates and defaults below.
+    {{if $.Columns}}Columns found: {{range $i, $c := $.Columns}}{{if $i}}, {{end}}<code>{{$c.Name}}</code>{{end}}.{{else}}Use <em>Test connection</em> to load the column names.{{end}}</p>
+  {{if $.FieldsWarning}}<p class="notice">{{$.FieldsWarning}}</p>{{end}}
+  {{if $.MappingWarnings}}<ul class="notice error">{{range $.MappingWarnings}}<li>{{.}}</li>{{end}}</ul>{{end}}
+  <datalist id="columns">{{range $.Columns}}<option value="{{.Name}}">{{.Type}}</option>{{end}}</datalist>
+  <div class="grid">
+    {{range $.Fields}}
+    <label>{{.Label}} <input name="field_{{.Key}}" value="{{.Value}}" list="columns" autocomplete="off" placeholder="column name" />
+      <span class="help">{{.Help}}</span></label>
+    {{end}}
+  </div>
+</section>
+
+<section>
+  <h2>Endpoint defaults</h2>
+  <div class="grid">
+    <label>Primary check
+      <select name="type" data-type-select>{{range $.Types}}<option value="{{.}}" {{if eq . $.Import.Type}}selected{{end}}>{{.}}</option>{{end}}</select></label>
+    <div>
+      <label>URL template <input name="urlTemplate" id="urlTemplate" value="{{.URLTemplate}}" placeholder="default: {{$.DefaultURLTemplate}}" /></label>
+      {{range $.TypeHints}}
+      <div class="url-examples" data-type-hint="{{.Type}}" data-default-template="{{.DefaultURL}}" data-default-conditions="{{.DefaultConditions}}" {{if ne .Type $.Import.Type}}hidden{{end}}>
+        {{if .Examples}}<span class="help">Examples (click to use):</span>
+        {{range .Examples}}<button type="button" class="url-example" data-example-template="{{.Template}}"><code>{{.Template}}</code><span>{{.Label}}</span></button>{{end}}{{end}}
+      </div>
+      {{end}}
+    </div>
+    <label>Name template <input name="nameTemplate" value="{{.NameTemplate}}" placeholder="default: {host}" />
+      <span class="help">Used when no name column is mapped or it is empty, e.g. {host}:{port}.</span></label>
+    <label>Default ports <input name="defaultPorts" value="{{.DefaultPorts}}" placeholder="e.g. 5201-5210" />
+      <span class="help">Used as {port} when the row has no port. For a range or list the first port is checked; every row gives one endpoint.</span></label>
+    <label class="wide">Conditions
+      <textarea name="conditions" id="conditions" rows="3" spellcheck="false" placeholder="default: {{$.DefaultConditions}}">{{.Conditions}}</textarea>
+      <span class="help">One per line. Used when the row has no conditions of its own.</span></label>
+  </div>
+</section>
+
+<section>
+  <h2>Schedule</h2>
+  <div class="grid">
+    <label>Interval <input name="interval" value="{{.Interval}}" placeholder="{{if $.DefaultInterval}}default: {{$.DefaultInterval}}{{else}}e.g. 15m{{end}}" />
+      <span class="help">How often each generated endpoint is checked. Unless the schedule is set manually, the table/view is also read at this interval (aligned to the clock, e.g. :00, :15, :30, :45 for 15m).</span></label>
+    <div>
+      <label class="check"><input type="checkbox" name="manualSchedule" data-toggle="cron" {{if .ManualSchedule}}checked{{end}} /> Manual schedule (cron)</label>
+      <input name="cron" id="cron" value="{{.Cron}}" placeholder="e.g. */30 * * * * or @hourly; empty = only manually" {{if not .ManualSchedule}}disabled{{end}} />
+      <span class="help">The table/view is read at the same interval as the checks. Tick to use your own cron expression, or leave it empty to only read it manually.</span>
+    </div>
+  </div>
+</section>
+{{end}}
+
+<div id="test-result">
+{{if .TestError}}<p class="notice error">Test failed: {{.TestError}}</p>
+{{else if .Tested}}
+  {{if not .PreviewRows}}<p class="notice error">Connection OK, but the table/view returned no rows. Check the Table ID and View ID, and the filters of the view.</p>
+  {{else if not .PreviewValid}}<p class="notice error">Connection OK: {{.PreviewRows}} rows read, but none gives a valid endpoint. See the skipped rows below and check the column mapping.</p>
+  {{else}}<p class="notice success">Connection OK: {{.PreviewRows}} rows read, {{.PreviewValid}} valid endpoints. Nothing is saved yet: click <em>Save</em> to keep these settings.</p>{{end}}
+{{end}}
+</div>
+{{if .Preview}}
+<section>
+  <h2>Preview</h2>
+  <p>The first {{len .Preview}} endpoints:</p>
+  <table class="list">
+    <thead><tr><th>Group</th><th>Name</th><th>URL</th><th>Interval</th><th>Conditions</th></tr></thead>
+    <tbody>
+    {{range .Preview}}
+      <tr><td>{{.Group}}</td><td>{{.Name}}</td><td><code>{{redact .URL}}</code></td><td>{{if .Interval}}{{.Interval}}{{else}}<span class="muted">default</span>{{end}}</td><td><pre>{{.Conditions}}</pre></td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{if .PreviewProblems}}
+  <h3>Rows that will be skipped</h3>
+  <ul class="problems">{{range .PreviewProblems}}<li>{{.}}</li>{{end}}</ul>
+  {{end}}
+</section>
+{{else if .PreviewProblems}}
+<section>
+  <h3>Rows that will be skipped</h3>
+  <ul class="problems">{{range .PreviewProblems}}<li>{{.}}</li>{{end}}</ul>
+</section>
+{{end}}
+
+<div class="form-actions">
+  <button type="submit" name="action" value="save">Save</button>
+  <button type="submit" name="action" value="test" class="secondary" formnovalidate formaction="/mod/admin/databases/{{.Database.ID}}/views/save#test-result" data-busy-label="Testing...">Test connection and preview</button>
+  <a href="/mod/admin/databases">Cancel</a>
+</div>
+</form>
+{{end}}
