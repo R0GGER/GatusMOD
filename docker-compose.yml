@@ -1,6 +1,6 @@
 services:
   gatus:
-    image: twinproduction/gatus:v5.37.0
+    image: ghcr.io/twin/gatus:latest
     restart: unless-stopped
     environment:
       GATUS_CONFIG_PATH: /config
