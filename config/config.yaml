@@ -8,10 +8,14 @@ storage:
 
 ui:
   title: Status | Example
+  # Logo at the top left: a full URL, or a path to a file in config/favicon (served at /favicon/).
+  logo: /favicon/gatusmod_128.png
+  link: /
   dashboard-heading: Status
   dashboard-subheading: Live status of our services
 
 # Gatus does not start without at least one endpoint, so keep this one until GatusMOD generates others.
+# Once you have a local table or database, you can remove it on the admin Settings page.
 endpoints:
   - name: GatusMOD
     group: Monitoring
