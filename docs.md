@@ -26,7 +26,8 @@ flowchart LR
 
 ## Installation
 
-1. Copy `docker-compose.yml` and the `config/` directory to your server, or add the `gatusmod` service to an existing Gatus Compose file.
+1. Copy `docker-compose.yml` to your server, or add the `gatusmod` service to an existing Gatus Compose file.
+   When the config directory contains no `.yaml`/`.yml` file at startup, GatusMOD writes the example `config.yaml` and the favicons into it. Existing files are never overwritten.
 2. Give Gatus a **directory** as its config: `GATUS_CONFIG_PATH=/config` with `./config:/config`, and mount the same directory in GatusMOD.
   With `GATUSMOD_DATA_PATH=/config`, admin settings, including database tokens, are stored as `settings.json` in that same directory (readable only by the container user). Gatus ignores the file because it is not `.yaml`.
    Without `GATUSMOD_DATA_PATH`, GatusMOD uses `/data`. Give that path its own volume, or the settings are lost when the container is recreated.
