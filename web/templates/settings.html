@@ -90,20 +90,6 @@
 </section>
 {{end}}
 
-{{with .Example}}
-<section>
-  <h2>Example endpoint</h2>
-  <p class="muted"><code>{{$.ExampleFile}}</code> still has the example endpoint <strong>{{.Label}}</strong>, which checks GatusMOD itself.
-    Gatus does not start without endpoints, so it is only there until your local tables or databases generate endpoints.</p>
-  {{if $.ExampleBlocked}}<p class="muted">{{$.ExampleBlocked}}</p>{{else}}
-  <form method="post" action="/mod/admin/settings/example/delete" data-confirm="Remove the example endpoint {{.Label}} from {{$.ExampleFile}}?">
-    <input type="hidden" name="csrf" value="{{$.CSRF}}" />
-    <button type="submit" class="danger">Remove example endpoint</button>
-  </form>
-  {{end}}
-</section>
-{{end}}
-
 <section>
   <h2>Admin password</h2>
   {{if .PasswordError}}<p class="notice error">{{.PasswordError}}</p>{{end}}

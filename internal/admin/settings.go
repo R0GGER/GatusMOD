@@ -111,7 +111,6 @@ func (a *Admin) renderSettings(w http.ResponseWriter, r *http.Request, data map[
 	data["Overridden"] = a.deps.Settings.Settings().General != (settings.General{})
 	data["PasswordFromSettings"] = a.deps.Settings.Settings().AdminPasswordBcrypt != ""
 	data["SettingsPath"] = a.deps.Settings.Path()
-	a.exampleData(data)
 	a.render(w, r, "settings.html", data)
 }
 
@@ -139,15 +138,15 @@ func (a *Admin) exampleData(data map[string]any) {
 func (a *Admin) exampleDelete(w http.ResponseWriter, r *http.Request) {
 	cfg := a.deps.Config()
 	if len(cfg.Imports) == 0 {
-		redirect(w, r, "/settings", "Add a local table, or a database with a table or view, before removing the example endpoint.")
+		redirect(w, r, "/", "Add a local table, or a database with a table or view, before removing the example endpoint.")
 		return
 	}
 	ex, err := config.RemoveExampleEndpoint(cfg.Path)
 	if err != nil {
-		redirect(w, r, "/settings", "Removing the example endpoint failed: "+err.Error())
+		redirect(w, r, "/", "Removing the example endpoint failed: "+err.Error())
 		return
 	}
-	redirect(w, r, "/settings", fmt.Sprintf("Example endpoint %s removed from %s. Gatus drops it within 30 seconds.", ex.Label(), filepath.Base(ex.File)))
+	redirect(w, r, "/", fmt.Sprintf("Example endpoint %s removed from %s. Gatus drops it within 30 seconds.", ex.Label(), filepath.Base(ex.File)))
 }
 
 func (a *Admin) settingsSave(w http.ResponseWriter, r *http.Request) {

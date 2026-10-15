@@ -400,27 +400,33 @@ func TestSettingsPage(t *testing.T) {
 	}
 }
 
-func TestSettingsPage_ExampleEndpoint(t *testing.T) {
+func TestOverview_ExampleEndpoint(t *testing.T) {
 	f := newFixture(t, http.StatusOK)
 	f.login(t)
 	file := filepath.Join(f.cfgDir, "config.yaml")
 	_ = os.WriteFile(file, []byte("endpoints:\n  - name: GatusMOD\n    url: http://gatusmod:8080/mod/health\n    conditions: [\"[STATUS] == 200\"]\n"), 0o644)
-	if body := f.get(t, "/settings").Body.String(); !strings.Contains(body, "Example endpoint") || !strings.Contains(body, "Wait until your tables have generated endpoints") {
+	if body := f.get(t, "/").Body.String(); !strings.Contains(body, "Example endpoint") || !strings.Contains(body, "Wait until your tables have generated endpoints") {
 		t.Errorf("removing should wait for generated endpoints\n%s", body)
 	}
+	if body := f.get(t, "/settings").Body.String(); strings.Contains(body, "Example endpoint") {
+		t.Error("the example endpoint belongs on the overview, not on the settings page")
+	}
 	f.post(t, "/sync", nil, true)
-	body := f.get(t, "/settings").Body.String()
-	if !strings.Contains(body, "/mod/admin/settings/example/delete") || !strings.Contains(body, "config.yaml") {
+	body := f.get(t, "/").Body.String()
+	if !strings.Contains(body, "/mod/admin/example/delete") || !strings.Contains(body, "config.yaml") {
 		t.Fatalf("expected the remove button\n%s", body)
 	}
-	rec := f.post(t, "/settings/example/delete", nil, true)
-	if loc, _ := url.QueryUnescape(rec.Header().Get("Location")); !strings.Contains(loc, "Example endpoint GatusMOD removed from config.yaml") {
+	if strings.Index(body, "Example endpoint") > strings.Index(body, "<h2>Endpoints &amp; probes</h2>") {
+		t.Error("the example endpoint should be above the endpoints and probes")
+	}
+	rec := f.post(t, "/example/delete", nil, true)
+	if loc, _ := url.QueryUnescape(rec.Header().Get("Location")); loc != Prefix+"/?msg=Example endpoint GatusMOD removed from config.yaml. Gatus drops it within 30 seconds." {
 		t.Errorf("unexpected result %s", loc)
 	}
 	if data, _ := os.ReadFile(file); strings.Contains(string(data), "GatusMOD") {
 		t.Errorf("the example endpoint is still there\n%s", data)
 	}
-	if body := f.get(t, "/settings").Body.String(); strings.Contains(body, "Example endpoint") {
+	if body := f.get(t, "/").Body.String(); strings.Contains(body, "<h2>Example endpoint</h2>") {
 		t.Error("the section should be gone after removing")
 	}
 }

@@ -108,7 +108,7 @@ func (a *Admin) Handler() http.Handler {
 	mux.HandleFunc("POST "+Prefix+"/settings", a.settingsSave)
 	mux.HandleFunc("POST "+Prefix+"/settings/reset", a.settingsReset)
 	mux.HandleFunc("POST "+Prefix+"/settings/password", a.changePassword)
-	mux.HandleFunc("POST "+Prefix+"/settings/example/delete", a.exampleDelete)
+	mux.HandleFunc("POST "+Prefix+"/example/delete", a.exampleDelete)
 	mux.HandleFunc("GET "+Prefix+"/status-pages", a.statusPagesList)
 	mux.HandleFunc("POST "+Prefix+"/status-pages", a.statusPageSave)
 	mux.HandleFunc("POST "+Prefix+"/status-pages/{id}/delete", a.statusPageDelete)
@@ -195,7 +195,7 @@ func (a *Admin) overview(w http.ResponseWriter, r *http.Request) {
 			attention = append(attention, p)
 		}
 	}
-	a.render(w, r, "overview.html", map[string]any{
+	data := map[string]any{
 		"Config":       cfg,
 		"Status":       a.deps.Syncer.Status(),
 		"Imports":      a.importRows(cfg),
@@ -203,7 +203,9 @@ func (a *Admin) overview(w http.ResponseWriter, r *http.Request) {
 		"Attention":    attention,
 		"Patches":      patches,
 		"SettingsPath": a.deps.Settings.Path(),
-	})
+	}
+	a.exampleData(data)
+	a.render(w, r, "overview.html", data)
 }
 
 func (a *Admin) checks(w http.ResponseWriter, r *http.Request) {
