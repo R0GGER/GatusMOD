@@ -3,5 +3,5 @@
 .plan/
 config/settings.json
 e2e/.run/
-gatusmod
-gatusmod.exe
+/gatusmod
+/gatusmod.exe
