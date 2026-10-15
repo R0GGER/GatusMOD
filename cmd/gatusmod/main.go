@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"gatusmod"
 	"gatusmod/internal/app"
 	"gatusmod/internal/config"
 	"gatusmod/internal/probe"
@@ -49,6 +50,11 @@ func serve() error {
 	path := os.Getenv(configPathEnvVar)
 	if path == "" {
 		path = "/config"
+	}
+	if seeded, err := config.SeedExample(path, gatusmod.Example()); err != nil {
+		return fmt.Errorf("writing the example configuration to %s: %w", path, err)
+	} else if seeded {
+		slog.Warn("the config directory was empty; wrote the example config.yaml and favicons. Change the admin password!", "path", path)
 	}
 	watcher, err := config.NewWatcher(path)
 	if err != nil {

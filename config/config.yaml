@@ -11,6 +11,15 @@ ui:
   dashboard-heading: Status
   dashboard-subheading: Live status of our services
 
+# Gatus does not start without at least one endpoint, so keep this one until GatusMOD generates others.
+endpoints:
+  - name: GatusMOD
+    group: Monitoring
+    url: http://gatusmod:8080/mod/health
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
 gatusmod:
   upstream: http://gatus:8080
   base-url: http://localhost:8080
