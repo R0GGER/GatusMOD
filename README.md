@@ -2,11 +2,11 @@
 
 > **Early release.** GatusMOD is still in early development. Expect bugs, rough edges, and breaking changes to the configuration between versions. Test it before relying on it in production, keep backups of your configuration and data, and please report any problems you run into.
 
-GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a separate container in front of Gatus and adds features without changing the Gatus code.
-
 <p align="center">
   <img src="config/favicon/gatusmod_128.png" alt="GatusMOD logo" width="128" height="128">
 </p>
+
+GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a separate container in front of Gatus and adds features without changing the Gatus code.
 
 - **Central database**: manage endpoints in NocoDB or Baserow. Per database several tables or views (for example `NocoDB-prod:http-sites` and `NocoDB-prod:iperf3-servers`), each with its own primary check, field mapping, and endpoint templates, become their own Gatus YAML file that Gatus reloads automatically.
 - **Protocols Gatus cannot check**: iperf3 (handshake and an optional bandwidth test), NTP, SNMP, SMTP, PostgreSQL, MySQL/MariaDB, Redis, MongoDB, and **push** endpoints (a script reports its status to a URL). GatusMOD runs these checks and reports the results to Gatus as external endpoints, so the dashboard, uptime, badges, and alerts keep working.
@@ -50,17 +50,20 @@ GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a 
         - ./config/favicon:/favicon:ro
         - ./config/public:/public:ro
   ```
-3. Create an admin password hash and paste it into `admin.password-bcrypt`:
-  ```bash
-   docker compose run --rm gatusmod hash-password 'your-password'
-  ```
-   The output already uses doubled `$$` (Gatus and GatusMOD replace `$VAR` with environment variables). Paste it as-is.
+3. Login at [http://localhost:8080/mod/admin](http://localhost:8080/mod/admin) with **username:** `admin` and **password:** `GatusMOD`.
+4. Change the default password as soon as possible. Generate a bcrypt hash of your new password:
+   ```bash
+   docker compose run --rm gatusmod hash-password 'your-new-password'
+   ```
+   Replace the value of `gatusmod.admin.password-bcrypt` in `config/config.yaml` with the output, exactly as printed. The hash already contains doubled `$$`, because Gatus and GatusMOD treat `$VAR` as an environment variable. GatusMOD picks up the change within 30 seconds.
 
-   The example `config/config.yaml` ships with the login `admin` / `GatusMOD` (at `http://<host>:8080/mod/admin/login`). Change this password before exposing GatusMOD.
 
-Adding GatusMOD to an existing Gatus setup? Point Gatus at the config **directory** (`GATUS_CONFIG_PATH=/config`), mount that same directory in GatusMOD, and add `skip-invalid-config-update: true` to your Gatus config.
+## Adding GatusMOD to an existing Gatus setup? 
 
+Point Gatus at the config **directory** (`GATUS_CONFIG_PATH=/config`), mount that same directory in GatusMOD, and add `skip-invalid-config-update: true` to your Gatus config.
 Gatus will not start if there is no endpoint anywhere. Keep at least one endpoint in `config.yaml`, or start GatusMOD first so the generated file already exists.
+
+## More docs
 
 Configuration, databases, the extra protocols, the admin page, badges, status pages, the statistics table, and development are documented in [docs.md](docs.md).
 
