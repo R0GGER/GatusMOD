@@ -4,6 +4,10 @@
 
 GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a separate container in front of Gatus and adds features without changing the Gatus code.
 
+<p align="center">
+  <img src="config/favicon/gatusmod_128.png" alt="GatusMOD logo" width="128" height="128">
+</p>
+
 - **Central database**: manage endpoints in NocoDB or Baserow. Per database several tables or views (for example `NocoDB-prod:http-sites` and `NocoDB-prod:iperf3-servers`), each with its own primary check, field mapping, and endpoint templates, become their own Gatus YAML file that Gatus reloads automatically.
 - **Protocols Gatus cannot check**: iperf3 (handshake and an optional bandwidth test), NTP, SNMP, SMTP, PostgreSQL, MySQL/MariaDB, Redis, MongoDB, and **push** endpoints (a script reports its status to a URL). GatusMOD runs these checks and reports the results to Gatus as external endpoints, so the dashboard, uptime, badges, and alerts keep working.
 - **Schedule per table/view** (aligned to the clock, a custom cron expression, or manual only) and a default check interval (`defaults.interval`).
