@@ -40,6 +40,9 @@ flowchart LR
    The output already uses doubled `$$` (Gatus and GatusMOD replace `$VAR` with environment variables). Paste it as-is into `admin.password-bcrypt`.
 
 Gatus will not start if there is no endpoint anywhere. Keep at least one endpoint in `config.yaml`, or start GatusMOD first so the generated file already exists.
+The example `config.yaml` has such an endpoint (GatusMOD checking `/mod/health`). Once you have a local table or a database with a table or view,
+remove it with **Remove example endpoint** on the admin **Settings** page. GatusMOD only deletes the lines of that endpoint, and refuses while it is the
+only endpoint Gatus has.
 
 ## Configuration
 
