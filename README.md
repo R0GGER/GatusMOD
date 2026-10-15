@@ -9,13 +9,21 @@
 GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a separate container in front of Gatus and adds features without changing the Gatus code.
 
 - **Central database**: manage endpoints in NocoDB or Baserow. Per database several tables or views (for example `NocoDB-prod:http-sites` and `NocoDB-prod:iperf3-servers`), each with its own primary check, field mapping, and endpoint templates, become their own Gatus YAML file that Gatus reloads automatically.
+- **Local database**: manage endpoints in a grid on the admin page, without NocoDB or Baserow.
 - **Protocols Gatus cannot check**: iperf3 (handshake and an optional bandwidth test), NTP, SNMP, SMTP, PostgreSQL, MySQL/MariaDB, Redis, MongoDB, and push endpoints (a script reports its status to a URL). GatusMOD runs these checks and reports the results to Gatus as external endpoints, so the dashboard, uptime, badges, and alerts keep working.
 - **Schedule per table/view** (aligned to the clock, a custom cron expression, or manual only) and a default check interval (`defaults.interval`).
 - **Pagination**: number of endpoints per dashboard page (Gatus is fixed at 96).
 - **Favicons**: `default`, `16x16`, `32x32`, `apple-touch`, `192x192`, `512x512` (also in `manifest.json`), with a `[baseurl]` placeholder.
 - **Footer** HTML that replaces Gatus's "Powered by Gatus" line, hide the heading and subtitle, a 12/24-hour clock and DD/MM or MM/DD date notation, and analytics (Umami or Plausible).
-- **Admin page** (`/mod/admin`, session login): databases and their tables/views, general settings, password change, sync status, import of an existing Gatus YAML file, and a **badge generator**.
-- **Public uptime badge** across all endpoints, a group, or a table/view (`/mod/badges/...`).
+- **Admin page** (`/mod/admin`, session login): databases and their tables/views, general settings, password change, sync status, import of an existing Gatus YAML file, and a badge generator.
+- **iperf3 history**: 30 days of bandwidth tests, with the pass rate and average bandwidth per period.
+- **Statistics table** on the endpoint page: response time, uptime, and ICMP ping of the same host for 30d, 7d, 24h, and 1h.
+- **Endpoints & probes** page: every generated endpoint and probe with its last result, next run, and push URL.
+- **Backup & restore** of the whole configuration as one YAML file (merge or replace).
+- **Public uptime badge** across all endpoints, a group, or a table/view (`/mod/badges/...`), and per-endpoint badges in the `flat`, `flat-square`, and `plastic` styles.
+- **Security**: CSRF protection, a strict Content-Security-Policy, and a 15-minute block after 5 failed logins.
+- **UI patch self-test**: GatusMOD checks after startup that its patches still match the Gatus UI and shows the result on the admin page.
+- **CLI**: `hash-password`, `probe` (test a check URL), and `healthcheck`.
 - **Status pages** per group and per endpoint: the endpoints of one or more groups, plus single endpoints, with their own title and heading, at `/status/<slug>` and on their own custom domains. **Private status pages** need a shared password, and their endpoints are hidden everywhere else.
 
 
