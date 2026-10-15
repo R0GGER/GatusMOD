@@ -108,6 +108,7 @@ func (a *Admin) Handler() http.Handler {
 	mux.HandleFunc("POST "+Prefix+"/settings", a.settingsSave)
 	mux.HandleFunc("POST "+Prefix+"/settings/reset", a.settingsReset)
 	mux.HandleFunc("POST "+Prefix+"/settings/password", a.changePassword)
+	mux.HandleFunc("POST "+Prefix+"/settings/example/delete", a.exampleDelete)
 	mux.HandleFunc("GET "+Prefix+"/status-pages", a.statusPagesList)
 	mux.HandleFunc("POST "+Prefix+"/status-pages", a.statusPageSave)
 	mux.HandleFunc("POST "+Prefix+"/status-pages/{id}/delete", a.statusPageDelete)

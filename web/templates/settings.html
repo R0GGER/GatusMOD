@@ -38,6 +38,16 @@
 </section>
 
 <section>
+  <h2>Logo</h2>
+  <div class="grid">
+    <label>Logo <input name="logo" value="{{.Logo}}" placeholder="/favicon/gatusmod_128.png" />
+      <span class="help">Image at the top left of the dashboard. Empty = the logo from the Gatus config. [baseurl] is replaced.</span></label>
+    <label>Logo link <input name="logoLink" value="{{.LogoLink}}" placeholder="https://www.example.com" />
+      <span class="help">Opened when the logo is clicked. Empty = the link from the Gatus config.</span></label>
+  </div>
+</section>
+
+<section>
   <h2>Favicons</h2>
   <div class="grid">
     <label>Default (.ico) <input name="favicon_default" value="{{.Favicon.Default}}" placeholder="/favicon/favicon.ico" /></label>
@@ -77,6 +87,20 @@
     <p class="muted">Removes the saved general settings, so config.yaml is used again. Databases, tables and the password are kept.</p>
     <button type="submit" class="secondary">Use config.yaml again</button>
   </form>
+</section>
+{{end}}
+
+{{with .Example}}
+<section>
+  <h2>Example endpoint</h2>
+  <p class="muted"><code>{{$.ExampleFile}}</code> still has the example endpoint <strong>{{.Label}}</strong>, which checks GatusMOD itself.
+    Gatus does not start without endpoints, so it is only there until your local tables or databases generate endpoints.</p>
+  {{if $.ExampleBlocked}}<p class="muted">{{$.ExampleBlocked}}</p>{{else}}
+  <form method="post" action="/mod/admin/settings/example/delete" data-confirm="Remove the example endpoint {{.Label}} from {{$.ExampleFile}}?">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}" />
+    <button type="submit" class="danger">Remove example endpoint</button>
+  </form>
+  {{end}}
 </section>
 {{end}}
 

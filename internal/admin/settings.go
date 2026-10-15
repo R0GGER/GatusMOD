@@ -1,7 +1,9 @@
 package admin
 
 import (
+	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -19,6 +21,8 @@ type generalForm struct {
 	Footer            string
 	TimeFormat        string
 	DateFormat        string
+	Logo              string
+	LogoLink          string
 	Favicon           config.Favicon
 	AnalyticsEnabled  bool
 	AnalyticsProvider string
@@ -36,6 +40,8 @@ func generalFromConfig(cfg *config.Config) generalForm {
 		Footer:          cfg.UI.Footer,
 		TimeFormat:      cfg.UI.TimeFormat,
 		DateFormat:      cfg.UI.DateFormat,
+		Logo:            cfg.UI.Logo,
+		LogoLink:        cfg.UI.LogoLink,
 		Favicon:         cfg.UI.Favicon,
 	}
 	if a := cfg.Analytics; a != nil {
@@ -54,6 +60,8 @@ func generalFromForm(r *http.Request) (generalForm, error) {
 		Footer:          strings.TrimSpace(r.PostFormValue("footer")),
 		TimeFormat:      v("timeFormat"),
 		DateFormat:      v("dateFormat"),
+		Logo:            v("logo"),
+		LogoLink:        v("logoLink"),
 		Favicon: config.Favicon{
 			Default: v("favicon_default"), Size16x16: v("favicon_16"), Size32x32: v("favicon_32"),
 			AppleTouch: v("favicon_apple"), Size192x192: v("favicon_192"), Size512x512: v("favicon_512"),
@@ -83,6 +91,8 @@ func (g generalForm) toSettings() settings.General {
 		Footer:               &g.Footer,
 		TimeFormat:           &g.TimeFormat,
 		DateFormat:           &g.DateFormat,
+		Logo:                 &g.Logo,
+		LogoLink:             &g.LogoLink,
 		Favicon:              &g.Favicon,
 		Analytics: &settings.Analytics{
 			Enabled: g.AnalyticsEnabled, Provider: g.AnalyticsProvider, ScriptURL: g.AnalyticsScript, SiteID: g.AnalyticsSite,
@@ -101,7 +111,43 @@ func (a *Admin) renderSettings(w http.ResponseWriter, r *http.Request, data map[
 	data["Overridden"] = a.deps.Settings.Settings().General != (settings.General{})
 	data["PasswordFromSettings"] = a.deps.Settings.Settings().AdminPasswordBcrypt != ""
 	data["SettingsPath"] = a.deps.Settings.Path()
+	a.exampleData(data)
 	a.render(w, r, "settings.html", data)
+}
+
+// exampleData adds the example endpoint of config.yaml and, when it cannot be removed yet, why not.
+func (a *Admin) exampleData(data map[string]any) {
+	cfg := a.deps.Config()
+	ex, err := config.FindExampleEndpoint(cfg.Path)
+	if err != nil || ex == nil {
+		return
+	}
+	file := filepath.Base(ex.File)
+	if rel, err := filepath.Rel(cfg.Path, ex.File); err == nil && !strings.HasPrefix(rel, "..") && rel != "." {
+		file = filepath.ToSlash(rel)
+	}
+	data["Example"] = ex
+	data["ExampleFile"] = file
+	switch {
+	case len(cfg.Imports) == 0:
+		data["ExampleBlocked"] = "Add a local table, or a database with a table or view, first."
+	case ex.OtherEndpoints < 1:
+		data["ExampleBlocked"] = "Gatus does not start without endpoints. Wait until your tables have generated endpoints (or run a sync), then remove it."
+	}
+}
+
+func (a *Admin) exampleDelete(w http.ResponseWriter, r *http.Request) {
+	cfg := a.deps.Config()
+	if len(cfg.Imports) == 0 {
+		redirect(w, r, "/settings", "Add a local table, or a database with a table or view, before removing the example endpoint.")
+		return
+	}
+	ex, err := config.RemoveExampleEndpoint(cfg.Path)
+	if err != nil {
+		redirect(w, r, "/settings", "Removing the example endpoint failed: "+err.Error())
+		return
+	}
+	redirect(w, r, "/settings", fmt.Sprintf("Example endpoint %s removed from %s. Gatus drops it within 30 seconds.", ex.Label(), filepath.Base(ex.File)))
 }
 
 func (a *Admin) settingsSave(w http.ResponseWriter, r *http.Request) {
