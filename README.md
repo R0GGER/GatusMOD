@@ -56,6 +56,8 @@ GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a 
   ```
    The output already uses doubled `$$` (Gatus and GatusMOD replace `$VAR` with environment variables). Paste it as-is.
 
+   The example `config/config.yaml` ships with the login `admin` / `GatusMOD` (at `http://<host>:8080/mod/admin/login`). Change this password before exposing GatusMOD.
+
 Adding GatusMOD to an existing Gatus setup? Point Gatus at the config **directory** (`GATUS_CONFIG_PATH=/config`), mount that same directory in GatusMOD, and add `skip-invalid-config-update: true` to your Gatus config.
 
 Gatus will not start if there is no endpoint anywhere. Keep at least one endpoint in `config.yaml`, or start GatusMOD first so the generated file already exists.
