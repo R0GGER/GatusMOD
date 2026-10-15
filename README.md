@@ -9,11 +9,11 @@
 GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a separate container in front of Gatus and adds features without changing the Gatus code.
 
 - **Central database**: manage endpoints in NocoDB or Baserow. Per database several tables or views (for example `NocoDB-prod:http-sites` and `NocoDB-prod:iperf3-servers`), each with its own primary check, field mapping, and endpoint templates, become their own Gatus YAML file that Gatus reloads automatically.
-- **Protocols Gatus cannot check**: iperf3 (handshake and an optional bandwidth test), NTP, SNMP, SMTP, PostgreSQL, MySQL/MariaDB, Redis, MongoDB, and **push** endpoints (a script reports its status to a URL). GatusMOD runs these checks and reports the results to Gatus as external endpoints, so the dashboard, uptime, badges, and alerts keep working.
+- **Protocols Gatus cannot check**: iperf3 (handshake and an optional bandwidth test), NTP, SNMP, SMTP, PostgreSQL, MySQL/MariaDB, Redis, MongoDB, and push endpoints (a script reports its status to a URL). GatusMOD runs these checks and reports the results to Gatus as external endpoints, so the dashboard, uptime, badges, and alerts keep working.
 - **Schedule per table/view** (aligned to the clock, a custom cron expression, or manual only) and a default check interval (`defaults.interval`).
 - **Pagination**: number of endpoints per dashboard page (Gatus is fixed at 96).
 - **Favicons**: `default`, `16x16`, `32x32`, `apple-touch`, `192x192`, `512x512` (also in `manifest.json`), with a `[baseurl]` placeholder.
-- **Footer** HTML that replaces Gatus's "Powered by Gatus" line, **hide the heading and subtitle**, a **12/24-hour clock and DD/MM or MM/DD date notation**, and **analytics** (Umami or Plausible).
+- **Footer** HTML that replaces Gatus's "Powered by Gatus" line, hide the heading and subtitle, a 12/24-hour clock and DD/MM or MM/DD date notation, and analytics (Umami or Plausible).
 - **Admin page** (`/mod/admin`, session login): databases and their tables/views, general settings, password change, sync status, import of an existing Gatus YAML file, and a **badge generator**.
 - **Public uptime badge** across all endpoints, a group, or a table/view (`/mod/badges/...`).
 - **Status pages** per group and per endpoint: the endpoints of one or more groups, plus single endpoints, with their own title and heading, at `/status/<slug>` and on their own custom domains. **Private status pages** need a shared password, and their endpoints are hidden everywhere else.
@@ -22,7 +22,8 @@ GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a 
 
 ## Quick start
 
-1. Copy `docker-compose.yml` and the `config/` directory to your server. The example `config/config.yaml` already contains `skip-invalid-config-update: true` (so an invalid generated file does not crash Gatus) and a `gatusmod:` block (see [Configuration](docs.md#configuration)).
+1. Copy `docker-compose.yml` and the `config/` directory to your server.    
+The example `config/config.yaml` already contains `skip-invalid-config-update: true` (so an invalid generated file does not crash Gatus) and a `gatusmod:` block (see [Configuration](docs.md#configuration)).
 2. Start with `docker compose up -d`. The Compose file looks like this:
   ```bash
    services:
