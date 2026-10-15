@@ -30,8 +30,8 @@ GatusMOD is an overlay for [Gatus](https://github.com/TwiN/gatus). It runs as a 
 
 ## Quick start
 
-1. Copy `docker-compose.yml` and the `config/` directory to your server.    
-The example `config/config.yaml` already contains `skip-invalid-config-update: true` (so an invalid generated file does not crash Gatus) and a `gatusmod:` block (see [Configuration](docs.md#configuration)).
+1. Copy `docker-compose.yml` to your server. If the config directory is empty (or missing) on first start, GatusMOD writes the example `config.yaml` and favicons into it; Gatus restarts once until that file exists.    
+The example `config/config.yaml` already contains `skip-invalid-config-update: true` (so an invalid generated file does not crash Gatus), one endpoint that checks GatusMOD itself, and a `gatusmod:` block (see [Configuration](docs.md#configuration)).
 2. Start with `docker compose up -d`. The Compose file looks like this:
   ```bash
    services:
