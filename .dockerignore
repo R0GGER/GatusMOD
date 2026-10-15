@@ -1,4 +1,6 @@
-config/
+config/*
+!config/config.yaml
+!config/favicon
 images/
 public/
 e2e/
