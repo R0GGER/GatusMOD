@@ -5,3 +5,4 @@ config/settings.json
 e2e/.run/
 /gatusmod
 /gatusmod.exe
+/config/db
