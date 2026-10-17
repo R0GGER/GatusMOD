@@ -1,6 +1,8 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #f7f9fb; color: #1f2937; font-size: 15px; }
 header { display: flex; align-items: center; gap: 2rem; padding: 0.9rem 1.5rem; background: #111827; color: #fff; }
+.brand { display: inline-flex; align-items: center; gap: 0.55rem; line-height: 1; }
+.brand img { width: 2rem; height: 2rem; display: block; flex: none; }
 header nav a { color: #d1d5db; text-decoration: none; margin-right: 1.2rem; }
 header nav a.active, header nav a:hover { color: #fff; }
 main { max-width: 1760px; margin: 0 auto; padding: 1.5rem; }
@@ -99,6 +101,9 @@ label.check { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.
 .embed-form { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1rem; }
 .embed-preview { background: #f9fafb; padding: 0.6rem; border-radius: 6px; margin-bottom: 0.8rem; }
 .login-page main { max-width: 380px; margin-top: 10vh; }
+.login-box { background: #111827; border-color: #111827; color: #fff; }
+.login-box .muted { color: #d1d5db; }
+.login-box input { color: #1f2937; }
 .login-box button { width: 100%; margin-top: 0.4rem; }
 .column-groups { display: flex; flex-wrap: wrap; gap: 1rem; }
 .column-groups fieldset { border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.4rem 0.9rem; min-width: 170px; }

@@ -10,7 +10,7 @@
 <body class="login-page">
   <main>
     <section class="login-box">
-      <h2>GatusMOD admin</h2>
+      <h2 class="brand"><img src="/mod/static/GatusMOD.svg" alt="" width="512" height="512" />GatusMOD admin</h2>
       {{if .Error}}<p class="notice error">{{.Error}}</p>{{end}}
       <form method="post" action="/mod/admin/login">
         <input type="hidden" name="next" value="{{.Next}}" />
